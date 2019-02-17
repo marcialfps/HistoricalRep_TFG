@@ -6,7 +6,7 @@ public class GPS : MonoBehaviour {
 
     public static GPS Instance { set; get; }
 
-    public float latitude, longitude;
+    public double latitude, longitude;
 
     /**
      * This method first launch the permissions to obtain the location.
@@ -16,6 +16,12 @@ public class GPS : MonoBehaviour {
         Instance = this;
         DontDestroyOnLoad(gameObject);
         StartCoroutine(StartLocationService());
+    }
+
+    private void Update()
+    {
+        latitude = Input.location.lastData.latitude;
+        longitude = Input.location.lastData.longitude;
     }
 
     private IEnumerator StartLocationService()
