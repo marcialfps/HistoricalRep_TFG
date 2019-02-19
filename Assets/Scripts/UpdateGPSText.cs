@@ -21,22 +21,43 @@ public class UpdateGPSText : MonoBehaviour {
 
     private void Update()
     {
-        var coord1 = new Coordinates(43.354699, -5.851079);
-        var coord2 = new Coordinates(GPS.Instance.latitude, GPS.Instance.longitude);
+        var coord1 = new Coordinates(43.354699, -5.851079); //Escuela
+        var coord2 = new Coordinates(43.354561, -5.852249); //San Gregorio
+        var coord3 = new Coordinates(43.353989, -5.853267); //America
 
-        var distancia = CoordinatesDistanceExtensions.DistanceTo(coord1, coord2);
+        var coordactual = new Coordinates(GPS.Instance.latitude, GPS.Instance.longitude);
+
+        var distancia1 = CoordinatesDistanceExtensions.DistanceTo(coord1, coordactual);
+        var distancia2 = CoordinatesDistanceExtensions.DistanceTo(coord2, coordactual);
+        var distancia3 = CoordinatesDistanceExtensions.DistanceTo(coord3, coordactual);
 
 
-        coordinates.text = "Lat: " + GPS.Instance.latitude
-            + "\nLon: " + GPS.Instance.longitude + "\nDistancia: " + CoordinatesDistanceExtensions.DistanceTo(coord1, coord2)+ " metros";
+        coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude 
+            + "\nDistancia escuela: " + distancia1 + " m."
+            + "\nDistancia gregorio: " + distancia2 + " m."
+            + "\nDistancia américa: " + distancia3 + " m.";
 
-        if (distancia < 940)
+        if (distancia1 < 5)
         {
-            /* if (!videoplayer.isPlaying)*/
+            rawImage.enabled = true;
+            videoPlayer.url = "http://clips.vorwaerts-gmbh.de/VfE_html5.mp4";
+            StartCoroutine(playVideo());
+        }
+        else if (distancia2 < 5)
+        {
+            rawImage.enabled = true;
+            videoPlayer.url = "http://techslides.com/demos/sample-videos/small.mp4";
+            StartCoroutine(playVideo());
+        }
+        else if (distancia3 < 5)
+        {
+            rawImage.enabled = true;
+            videoPlayer.url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4";
             StartCoroutine(playVideo());
         }
         else
         {
+            rawImage.enabled = false;
             videoPlayer.Stop();
         }
     }
