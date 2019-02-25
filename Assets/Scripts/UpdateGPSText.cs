@@ -9,7 +9,6 @@ using UnityEngine.Video;
 public class UpdateGPSText : MonoBehaviour {
 
     public Text coordinates;
-    public RawImage rawImage;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     private ArrayList locations;
@@ -17,19 +16,18 @@ public class UpdateGPSText : MonoBehaviour {
     public UpdateGPSText()
     {
         locations = new ArrayList();
+        locations.Add(new Coordinates(43.355078, -5.851307)); //Escuela
+        locations.Add(new Coordinates(43.354561, -5.852249)); //San Gregorio
+        locations.Add(new Coordinates(43.353989, -5.853267)); //América
     }
 
     private void Update()
     {
-        var coord1 = new Coordinates(43.354699, -5.851079); //Escuela
-        var coord2 = new Coordinates(43.354561, -5.852249); //San Gregorio
-        var coord3 = new Coordinates(43.353989, -5.853267); //America
-
         var coordactual = new Coordinates(GPS.Instance.latitude, GPS.Instance.longitude);
 
-        var distancia1 = CoordinatesDistanceExtensions.DistanceTo(coord1, coordactual);
-        var distancia2 = CoordinatesDistanceExtensions.DistanceTo(coord2, coordactual);
-        var distancia3 = CoordinatesDistanceExtensions.DistanceTo(coord3, coordactual);
+        var distancia1 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[0], coordactual);
+        var distancia2 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[1], coordactual);
+        var distancia3 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[2], coordactual);
 
 
         coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude 
@@ -37,44 +35,37 @@ public class UpdateGPSText : MonoBehaviour {
             + "\nDistancia gregorio: " + distancia2 + " m."
             + "\nDistancia américa: " + distancia3 + " m.";
 
-        if (distancia1 < 5)
+        foreach(Coordinates c in locations)
         {
-            rawImage.enabled = true;
-            videoPlayer.url = "http://clips.vorwaerts-gmbh.de/VfE_html5.mp4";
-            StartCoroutine(playVideo());
+            // TO-DO
         }
-        else if (distancia2 < 5)
+        
+        if (distancia1 < 920)
         {
-            rawImage.enabled = true;
-            videoPlayer.url = "http://techslides.com/demos/sample-videos/small.mp4";
-            StartCoroutine(playVideo());
+            reproduceVideo("http://techslides.com/demos/sample-videos/small.mp4");
         }
-        else if (distancia3 < 5)
+        else if (distancia2 < 1020)
         {
-            rawImage.enabled = true;
-            videoPlayer.url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4";
-            StartCoroutine(playVideo());
+            reproduceVideo("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
+        }
+        else if (distancia3 < 1120)
+        {
+            reproduceVideo("http://mirrors.standaloneinstaller.com/video-sample/Panasonic_HDC_TM_700_P_50i.avi");
         }
         else
         {
-            rawImage.enabled = false;
             videoPlayer.Stop();
         }
     }
 
-    IEnumerator playVideo()
+    private void reproduceVideo(String url)
     {
-        videoPlayer.Prepare();
-        WaitForSeconds waitForSeconds = new WaitForSeconds(1);
-        while (!videoPlayer.isPrepared)
+        if (!videoPlayer.isPlaying)
         {
-            yield return waitForSeconds;
-            break;
+            videoPlayer.url = url;
+            UnityEngine.Debug.Log("Puesta url");
+            videoPlayer.Play();
         }
-
-        rawImage.texture = videoPlayer.texture;
-        videoPlayer.Play();
-        audioSource.Play();
     }
 }
 
