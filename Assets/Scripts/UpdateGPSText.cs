@@ -8,9 +8,10 @@ using UnityEngine.Video;
 
 public class UpdateGPSText : MonoBehaviour {
 
-    public Text coordinates;
+    public Text coordinates, title;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
+    public Renderer renderer;
     private ArrayList locations;
 
     public UpdateGPSText()
@@ -31,35 +32,42 @@ public class UpdateGPSText : MonoBehaviour {
 
 
         coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude 
-            + "\nDistancia escuela: " + distancia1 + " m."
-            + "\nDistancia gregorio: " + distancia2 + " m."
-            + "\nDistancia américa: " + distancia3 + " m.";
+            + "\nDistancia escuela: " + Math.Round(distancia1,2) + " m."
+            + "\nDistancia gregorio: " + Math.Round(distancia2,2) + " m."
+            + "\nDistancia américa: " + Math.Round(distancia3,2) + " m.";
 
         foreach(Coordinates c in locations)
         {
             // TO-DO
         }
         
-        if (distancia1 < 920)
+        if (distancia1 < 912)
         {
-            reproduceVideo("http://techslides.com/demos/sample-videos/small.mp4");
+            title.text = "Escuela de Ing. Informática";
+            reproduceVideo("https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4");
         }
         else if (distancia2 < 1020)
         {
-            reproduceVideo("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
+            title.text = "Colegio Mayor San Gregorio";
+            reproduceVideo("https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4");
         }
         else if (distancia3 < 1120)
         {
-            reproduceVideo("http://mirrors.standaloneinstaller.com/video-sample/Panasonic_HDC_TM_700_P_50i.avi");
+            title.text = "Colegio Mayor América";
+            reproduceVideo("https://media.w3.org/2010/05/sintel/trailer.mp4");
         }
         else
         {
+            title.text = "";
             videoPlayer.Stop();
+            renderer.enabled = false;
         }
     }
 
     private void reproduceVideo(String url)
     {
+        renderer.enabled = true;
+        if (videoPlayer.url != url) videoPlayer.Stop(); //Casos en lo que se cambie de video
         if (!videoPlayer.isPlaying)
         {
             videoPlayer.url = url;
