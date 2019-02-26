@@ -41,17 +41,17 @@ public class UpdateGPSText : MonoBehaviour {
             // TO-DO
         }
         
-        if (distancia1 < 912)
+        if (distancia1 < 8)
         {
             title.text = "Escuela de Ing. Informática";
             reproduceVideo("https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4");
         }
-        else if (distancia2 < 1020)
+        else if (distancia2 < 8)
         {
             title.text = "Colegio Mayor San Gregorio";
             reproduceVideo("https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4");
         }
-        else if (distancia3 < 1120)
+        else if (distancia3 < 8)
         {
             title.text = "Colegio Mayor América";
             reproduceVideo("https://media.w3.org/2010/05/sintel/trailer.mp4");
