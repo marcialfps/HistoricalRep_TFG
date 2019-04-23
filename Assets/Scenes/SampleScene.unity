@@ -480,6 +480,11 @@ MonoBehaviour:
   playpauseBtn: {fileID: 1296677781}
   cancelBtn: {fileID: 1977386688}
   stopBtn: {fileID: 1676207086}
+  playpause: {fileID: 850752254}
+  cancel: {fileID: 801808549}
+  stop: {fileID: 1441473571}
+  play: {fileID: 2800000, guid: a6319d4ab7ac74f4ba0a5a7cf5274afa, type: 3}
+  pause: {fileID: 2800000, guid: 00a130e4b00072844983d9898b21579b, type: 3}
   videoplayer: {fileID: 1078629053}
 --- !u!1 &801808547
 GameObject:
@@ -492,7 +497,7 @@ GameObject:
   - component: {fileID: 801808550}
   - component: {fileID: 801808549}
   m_Layer: 5
-  m_Name: RawImage
+  m_Name: RawCancel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -560,7 +565,7 @@ GameObject:
   - component: {fileID: 850752255}
   - component: {fileID: 850752254}
   m_Layer: 5
-  m_Name: RawImage
+  m_Name: RawPausePlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -603,7 +608,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Texture: {fileID: 2800000, guid: a6319d4ab7ac74f4ba0a5a7cf5274afa, type: 3}
+  m_Texture: {fileID: 2800000, guid: 00a130e4b00072844983d9898b21579b, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -794,7 +799,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: cf1c0ef993f9ee94181afca26480d35e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1000,7 +1005,7 @@ GameObject:
   - component: {fileID: 1296677782}
   - component: {fileID: 1296677781}
   m_Layer: 5
-  m_Name: BtnPlay
+  m_Name: BtnPausePlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1111,7 +1116,7 @@ GameObject:
   - component: {fileID: 1441473572}
   - component: {fileID: 1441473571}
   m_Layer: 5
-  m_Name: RawImage
+  m_Name: RawStop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

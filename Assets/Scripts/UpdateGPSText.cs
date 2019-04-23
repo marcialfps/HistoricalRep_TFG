@@ -17,9 +17,10 @@ public class UpdateGPSText : MonoBehaviour {
     public UpdateGPSText()
     {
         locations = new ArrayList();
-        locations.Add(new Coordinates(43.355078, -5.851307)); //Escuela
+        locations.Add(new Coordinates(43.360481, -5.842514)); //Escuela
         locations.Add(new Coordinates(43.354561, -5.852249)); //San Gregorio
         locations.Add(new Coordinates(43.353989, -5.853267)); //América
+        locations.Add(new Coordinates(29.054405, -13.633832)); //Tiagua
     }
 
     private void Update()
@@ -30,21 +31,20 @@ public class UpdateGPSText : MonoBehaviour {
         var distancia2 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[1], coordactual);
         var distancia3 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[2], coordactual);
 
+        var distancia4 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[3], coordactual);
 
-        coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude 
-            + "\nDistancia escuela: " + Math.Round(distancia1,2) + " m."
-            + "\nDistancia gregorio: " + Math.Round(distancia2,2) + " m."
-            + "\nDistancia américa: " + Math.Round(distancia3,2) + " m.";
+
+        coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
 
         foreach(Coordinates c in locations)
         {
             // TO-DO
         }
         
-        if (distancia1 < 8)
+        if (distancia1 < 20)
         {
             title.text = "Escuela de Ing. Informática";
-            reproduceVideo("https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4");
+            reproduceVideo("https://ak8.picdn.net/shutterstock/videos/13579628/preview/stock-footage-playing-jumping-little-girl-in-white-with-red-dress-enjoys-game-footage-with-alpha-channel-file.webm");
         }
         else if (distancia2 < 8)
         {
@@ -54,6 +54,11 @@ public class UpdateGPSText : MonoBehaviour {
         else if (distancia3 < 8)
         {
             title.text = "Colegio Mayor América";
+            reproduceVideo("https://media.w3.org/2010/05/sintel/trailer.mp4");
+        }
+        else if (distancia4 < 8)
+        {
+            title.text = "Tiagua";
             reproduceVideo("https://media.w3.org/2010/05/sintel/trailer.mp4");
         }
         else
