@@ -6,15 +6,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-public class UpdateGPSText : MonoBehaviour {
+public class UpdateUI : MonoBehaviour {
 
-    public Text coordinates, title;
+    public Text title;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
     private ArrayList locations;
 
-    public UpdateGPSText()
+    public UpdateUI()
     {
         locations = new ArrayList();
         locations.Add(new Coordinates(43.360481, -5.842514)); //Escuela
@@ -33,8 +33,7 @@ public class UpdateGPSText : MonoBehaviour {
 
         var distancia4 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[3], coordactual);
 
-
-        coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
+        
 
         foreach(Coordinates c in locations)
         {
@@ -51,22 +50,22 @@ public class UpdateGPSText : MonoBehaviour {
             title.text = "Colegio Mayor San Gregorio";
             reproduceVideo("https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4");
         }
-        else if (distancia3 < 8)
+        else // if (distancia3 < 8)
         {
             title.text = "Colegio Mayor América";
-            reproduceVideo("https://media.w3.org/2010/05/sintel/trailer.mp4");
+            reproduceVideo("https://ak8.picdn.net/shutterstock/videos/13579628/preview/stock-footage-playing-jumping-little-girl-in-white-with-red-dress-enjoys-game-footage-with-alpha-channel-file.webm");
         }
-        else if (distancia4 < 8)
-        {
+        //else //if (distancia4 < 800)
+        /*{
             title.text = "Tiagua";
-            reproduceVideo("https://media.w3.org/2010/05/sintel/trailer.mp4");
-        }
-        else
+            //reproduceVideo("file://" + Application.dataPath + "/Videos/prueba.mov");
+        }*/
+       /* else
         {
             title.text = "";
             videoPlayer.Stop();
             renderer.enabled = false;
-        }
+        }*/
     }
 
     private void reproduceVideo(String url)
@@ -79,61 +78,5 @@ public class UpdateGPSText : MonoBehaviour {
             UnityEngine.Debug.Log("Puesta url");
             videoPlayer.Play();
         }
-    }
-}
-
-public class Coordinates
-{
-    public double Latitude { get; private set; }
-    public double Longitude { get; private set; }
-
-    public Coordinates(double latitude, double longitude)
-    {
-        Latitude = latitude;
-        Longitude = longitude;
-    }
-}
-public static class CoordinatesDistanceExtensions
-{
-    public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates)
-    {
-        return DistanceTo(baseCoordinates, targetCoordinates, UnitOfLength.Kilometers);
-    }
-
-    public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates, UnitOfLength unitOfLength)
-    {
-        var baseRad = Math.PI * baseCoordinates.Latitude / 180;
-        var targetRad = Math.PI * targetCoordinates.Latitude / 180;
-        var theta = baseCoordinates.Longitude - targetCoordinates.Longitude;
-        var thetaRad = Math.PI * theta / 180;
-
-        double dist =
-            Math.Sin(baseRad) * Math.Sin(targetRad) + Math.Cos(baseRad) *
-            Math.Cos(targetRad) * Math.Cos(thetaRad);
-        dist = Math.Acos(dist);
-
-        dist = dist * 180 / Math.PI;
-        dist = dist * 60 * 1.1515;
-
-        return unitOfLength.ConvertFromMiles(dist) * 1000; //To meters
-    }
-}
-
-public class UnitOfLength
-{
-    public static UnitOfLength Kilometers = new UnitOfLength(1.609344);
-    public static UnitOfLength NauticalMiles = new UnitOfLength(0.8684);
-    public static UnitOfLength Miles = new UnitOfLength(1);
-
-    private readonly double _fromMilesFactor;
-
-    private UnitOfLength(double fromMilesFactor)
-    {
-        _fromMilesFactor = fromMilesFactor;
-    }
-
-    public double ConvertFromMiles(double input)
-    {
-        return input * _fromMilesFactor;
     }
 }
