@@ -223,8 +223,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de01dbb2eb9015f43afba4cad9934cfa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  latitude: 0
-  longitude: 0
+  latitude: -5.842514
+  longitude: 43.360481
 --- !u!114 &63256773
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,13 +238,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coordinates: {fileID: 77336978}
   title: {fileID: 1077244821}
+  titleRep: {fileID: 169955773}
   showButton: {fileID: 365094093}
   cancelButton: {fileID: 602701576}
+  nearLocation1: {fileID: 727105710}
+  nearLocation2: {fileID: 1606239636}
+  nearLocation3: {fileID: 314079204}
   panelShow: {fileID: 183958445}
   panelRepresentation: {fileID: 1845157849}
   panelMap: {fileID: 1019332077}
   arCamera: {fileID: 1938616613}
   representationScreen: {fileID: 310902737}
+  videoPlayer: {fileID: 310902739}
+  audioSource: {fileID: 310902738}
+  renderer: {fileID: 310902741}
 --- !u!1 &77336977
 GameObject:
   m_ObjectHideFlags: 0
@@ -877,7 +884,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!82 &310902738
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1092,7 +1099,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &314079203
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1107,10 +1114,10 @@ RectTransform:
   m_Father: {fileID: 366938772}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 95.57333, y: -39.95333}
+  m_SizeDelta: {x: 191.14667, y: 79.90666}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &314079204
 MonoBehaviour:
@@ -1818,7 +1825,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &727105709
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1833,10 +1840,10 @@ RectTransform:
   m_Father: {fileID: 366938772}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 46.536667, y: -39.95333}
+  m_SizeDelta: {x: 93.07333, y: 79.90666}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &727105710
 MonoBehaviour:
@@ -2480,7 +2487,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9aadde45ece12475ea4aac8381197c44, type: 3}
-    m_FontSize: 80
+    m_FontSize: 50
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -3022,7 +3029,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1606239635
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3037,10 +3044,10 @@ RectTransform:
   m_Father: {fileID: 366938772}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 62.882225, y: -39.95333}
+  m_SizeDelta: {x: 125.76445, y: 79.90666}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1606239636
 MonoBehaviour:
@@ -3314,7 +3321,6 @@ GameObject:
   - component: {fileID: 1845157850}
   - component: {fileID: 1845157852}
   - component: {fileID: 1845157851}
-  - component: {fileID: 1845157853}
   m_Layer: 5
   m_Name: PanelRepresentation
   m_TagString: Untagged
@@ -3379,21 +3385,6 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1845157849}
   m_CullTransparentMesh: 0
---- !u!114 &1845157853
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1845157849}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbaf1262836a58c4f801079706b8a19f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  title: {fileID: 169955773}
-  videoPlayer: {fileID: 310902739}
-  audioSource: {fileID: 310902738}
-  renderer: {fileID: 310902741}
 --- !u!1 &1923211594
 GameObject:
   m_ObjectHideFlags: 0

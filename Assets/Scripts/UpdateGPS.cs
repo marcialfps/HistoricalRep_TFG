@@ -2,79 +2,173 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.SceneManagement;
 
+
 public class UpdateGPS : MonoBehaviour
 {
+    private String serverUrl = "http://192.168.1.103:8080";
     private ArrayList locations;
+    private Representation actualRep;
+    private Boolean isShowing;
     string exampleUrl1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
     string exampleUrl2 = "&zoom=13&size=600x300&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
     string key = "&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
-    public Text coordinates, title;
-    public Button showButton, cancelButton;
+
+
+    //User interface
+    public Text coordinates, title, titleRep;
+    public Button showButton, cancelButton, nearLocation1, nearLocation2, nearLocation3;
     public GameObject panelShow, panelRepresentation, panelMap, arCamera, representationScreen;
+    public VideoPlayer videoPlayer;
+    public AudioSource audioSource;
+    public Renderer renderer;
 
     public UpdateGPS()
     {
         locations = new ArrayList();
-        locations.Add(new Coordinates(43.360481, -5.842514)); //Escuela
-        locations.Add(new Coordinates(43.354561, -5.852249)); //San Gregorio
-        locations.Add(new Coordinates(43.353989, -5.853267)); //América
-        locations.Add(new Coordinates(43.360833, -5.842222)); //Tiagua
+        // Obtain locations
+        obtainLocations();
     }
 
     private void Update()
     {
-        var coordactual = new Coordinates(GPS.Instance.latitude, GPS.Instance.longitude);
-
-        var distancia1 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[0], coordactual);
-        var distancia2 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[1], coordactual);
-        var distancia3 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[2], coordactual);
-        var distancia4 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[3], coordactual);
-
+        var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude, 0);
         coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
 
-        foreach (Coordinates c in locations)
+        if (!isShowing)
         {
-            // TO-DO
+            foreach (Location l in locations)
+            {
+                var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
+                UnityEngine.Debug.Log("Distance: " + distance);
+                if (distance < 485559 && actualRep == null && !isShowing) // less 10 meters show
+                {
+                    UnityEngine.Debug.Log("Location detected");
+                    obtainAllInfo(l.id);
+                    obtainRepVideo(l.id);
+                    isShowing = true;
+                }
+                else //if (distance < 5000000) // less 30 meters show as near location
+                {
+                    UnityEngine.Debug.Log("Near location detected");
+                    obtainRepImage(l.id);
+                }
+                /*else
+                {
+                    actualRep = null;
+                    title.text = "";
+                    videoPlayer.Stop();
+                    renderer.enabled = false;
+                }*/
+            }
         }
+    }
 
-        if (!panelShow.gameObject.activeInHierarchy && !panelRepresentation.gameObject.activeInHierarchy) { 
-            if (distancia1 < 20)
-            {
-                title.text = "Escuela de Ing. Informática";
-                panelShow.gameObject.SetActive(true);
-                showButton.onClick.AddListener(showScene);
-            }
-            else if (distancia2 < 8)
-            {
-                title.text = "Colegio Mayor San Gregorio";
-                panelShow.gameObject.SetActive(true);
-                showButton.onClick.AddListener(showScene);
-            }
-            else if (distancia3 < 8)
-            {
-                title.text = "Colegio Mayor América";
-                panelShow.gameObject.SetActive(true);
-                showButton.onClick.AddListener(showScene);
-            }
-            else /*if (distancia4 < 10)*/
-            {
-                title.text = "Tiagua";
-                panelShow.gameObject.SetActive(true);
-                showButton.onClick.AddListener(showScene);
-            }
+    private void configureUI()
+    {
+        UnityEngine.Debug.Log("Configuring UI: "+actualRep.title);
+        title.text = actualRep.title;
+        panelShow.gameObject.SetActive(true);
+        showButton.onClick.AddListener(showScene);
+    }
 
+    private void obtainLocations()
+    {
+        UnityEngine.Debug.Log("Creating request");
+        WebRequest wrGET = WebRequest.Create(serverUrl+ "/location/list");
+
+        Stream objStream = wrGET.GetResponse().GetResponseStream();
+        StreamReader objReader = new StreamReader(objStream);
+        String data = objReader.ReadLine();
+        UnityEngine.Debug.Log(data);
+        parseLocation(data);
+    }
+
+    private void obtainAllInfo(long id)
+    {
+        UnityEngine.Debug.Log("Creating request");
+        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/"+id);
+        Stream objStream = wrGET.GetResponse().GetResponseStream();
+        StreamReader objReader = new StreamReader(objStream);
+        String data = objReader.ReadLine();
+        UnityEngine.Debug.Log(data);
+        parseRepresentationInfo(data);
+    }
+
+    private void obtainRepVideo(long id)
+    {
+        UnityEngine.Debug.Log("Creating request");
+        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/video/" + id);
+        Stream objStream = wrGET.GetResponse().GetResponseStream();
+        StreamReader objReader = new StreamReader(objStream);
+        String data = objReader.ReadLine();
+        actualRep.videoURL = serverUrl + data;
+        UnityEngine.Debug.Log(actualRep.videoURL);
+        configureUI();
+    }
+
+    private void obtainRepImage(long id)
+    {
+        UnityEngine.Debug.Log("Creating request");
+        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + id);
+        Stream objStream = wrGET.GetResponse().GetResponseStream();
+        StreamReader objReader = new StreamReader(objStream);
+        String data = objReader.ReadLine();
+        UnityEngine.Debug.Log(data);
+        configureNearButton(serverUrl+data);
+    }
+
+    private IEnumerator configureNearButton(String image)
+    {
+        UnityEngine.Debug.Log(image);
+        WWW www = new WWW(image);
+        yield return www;
+        nearLocation1.image.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
+        nearLocation1.gameObject.SetActive(true);
+    }
+
+    private void parseLocation(String data)
+    {
+        // Remove [ ]
+        String data2 = data.Trim(new Char[] { '[',']' });
+
+        foreach (String l in data2.Split(','))
+        {
+            // Remove { }
+            String l1 = l.Trim(new Char[] { '{', '}', ' '});
+            UnityEngine.Debug.Log(l1);
+
+            string[] aux = l1.Split(';');
+            double lat = Convert.ToDouble(aux[0]);
+            double lon = Convert.ToDouble(aux[1]);
+            long id = Convert.ToInt64(aux[2]);
+
+            this.locations.Add(new Location(lat, lon, id));
         }
-        /* else
-         {
-             title.text = "";
-             videoPlayer.Stop();
-             renderer.enabled = false;
-         }*/
+    }
+
+    private void parseRepresentationInfo(String data)
+    {
+        // Remove { }
+        String data2 = data.Trim(new Char[] { '{', '}' });
+
+        string[] l = data2.Split(',');
+        long id = Convert.ToInt64(l[0].Split(':')[1]);
+        string title = l[1].Split(':')[1];
+        string description = l[2].Split(':')[1];
+        string history = l[3].Split(':')[1];
+        string interestInfo = l[4].Split(':')[1];
+        string technicalInfo = l[5].Split(':')[1];
+        double latitude = Convert.ToDouble(l[6].Split(':')[1]);
+        double longitude = Convert.ToDouble(l[6].Split(':')[1]);
+
+        this.actualRep = new Representation(id, title, description, history, interestInfo, technicalInfo, latitude, longitude);
     }
 
     private void showScene()
@@ -85,6 +179,8 @@ public class UpdateGPS : MonoBehaviour
         panelShow.gameObject.SetActive(false);
         panelMap.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
+        titleRep.text = actualRep.title;
+        reproduceVideo(actualRep.videoURL);
     }
 
     private void configureCancelButton()
@@ -93,28 +189,69 @@ public class UpdateGPS : MonoBehaviour
         arCamera.SetActive(false);
         representationScreen.SetActive(false);
         panelMap.gameObject.SetActive(true);
+        isShowing = false;
+        actualRep = null;
     }
-}
 
-public class Coordinates
-{
-    public double Latitude { get; private set; }
-    public double Longitude { get; private set; }
-
-    public Coordinates(double latitude, double longitude)
+    private void reproduceVideo(String url)
     {
-        Latitude = latitude;
-        Longitude = longitude;
+        renderer.enabled = true;
+        if (videoPlayer.url != url) videoPlayer.Stop(); //Casos en lo que se cambie de video
+        if (!videoPlayer.isPlaying)
+        {
+            videoPlayer.url = url;
+            UnityEngine.Debug.Log("Añadida url a videoplayer: "+url);
+            videoPlayer.Play();
+        }
     }
 }
+
+public class Location
+{
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public long id { get; set; }
+
+    public Location(double latitude, double longitude, long id)
+    {
+        this.Latitude = latitude;
+        this.Longitude = longitude;
+        this.id = id;
+    }
+}
+
+public class Representation
+{
+    public long id { get; set; }
+    public string title { get; set; }
+    public string description { get; set; }
+    public string history { get; set; }
+    public string interestInfo { get; set; }
+    public string technicalInfo { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public string videoURL { get; set; }
+
+    public Representation(long id, string title, string des, string hist, string interest, string techn, double lat, double longi)
+    {
+        this.id = id;
+        this.title = title;
+        this.description = des;
+        this.history = hist;
+        this.technicalInfo = techn;
+        this.Latitude = lat;
+        this.Longitude = longi;
+    }
+}
+
 public static class CoordinatesDistanceExtensions
 {
-    public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates)
+    public static double DistanceTo(this Location baseCoordinates, Location targetCoordinates)
     {
         return DistanceTo(baseCoordinates, targetCoordinates, UnitOfLength.Kilometers);
     }
 
-    public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates, UnitOfLength unitOfLength)
+    public static double DistanceTo(this Location baseCoordinates, Location targetCoordinates, UnitOfLength unitOfLength)
     {
         var baseRad = Math.PI * baseCoordinates.Latitude / 180;
         var targetRad = Math.PI * targetCoordinates.Latitude / 180;

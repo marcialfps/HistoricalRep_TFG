@@ -17,25 +17,33 @@ public class UpdateUI : MonoBehaviour {
     public UpdateUI()
     {
         locations = new ArrayList();
-        locations.Add(new Coordinates(43.360481, -5.842514)); //Escuela
-        locations.Add(new Coordinates(43.354561, -5.852249)); //San Gregorio
-        locations.Add(new Coordinates(43.353989, -5.853267)); //América
-        locations.Add(new Coordinates(29.054405, -13.633832)); //Tiagua
+        /*
+        locations.Add(new Location(43.360481, -5.842514)); //Escuela
+        locations.Add(new Location(43.354561, -5.852249)); //San Gregorio
+        locations.Add(new Location(43.353989, -5.853267)); //América
+        locations.Add(new Location(29.054405, -13.633832)); //Tiagua
+        */
     }
 
     private void Update()
     {
-        var coordactual = new Coordinates(GPS.Instance.latitude, GPS.Instance.longitude);
+        /*
+        var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude);
 
-        var distancia1 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[0], coordactual);
-        var distancia2 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[1], coordactual);
-        var distancia3 = CoordinatesDistanceExtensions.DistanceTo((Coordinates) locations[2], coordactual);
+        var distancia1 = CoordinatesDistanceExtensions.DistanceTo((Location) locations[0], coordactual);
+        var distancia2 = CoordinatesDistanceExtensions.DistanceTo((Location) locations[1], coordactual);
+        var distancia3 = CoordinatesDistanceExtensions.DistanceTo((Location) locations[2], coordactual);
 
-        var distancia4 = CoordinatesDistanceExtensions.DistanceTo((Coordinates)locations[3], coordactual);
+        var distancia4 = CoordinatesDistanceExtensions.DistanceTo((Location)locations[3], coordactual);
+        */
 
-        
+        var distancia1 = 1;
+        var distancia2 = 2;
+        var distancia3 = 3;
 
-        foreach(Coordinates c in locations)
+
+
+        foreach (Location c in locations)
         {
             // TO-DO
         }
