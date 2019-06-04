@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.103:8080";
+    private String serverUrl = "http://192.168.1.38:8080";
     private ArrayList locations;
     private Representation actualRep;
     private Boolean isShowing;
@@ -28,6 +28,7 @@ public class UpdateGPS : MonoBehaviour
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
+    public Image map;
 
     public UpdateGPS()
     {
@@ -40,6 +41,7 @@ public class UpdateGPS : MonoBehaviour
     {
         var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude, 0);
         coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
+        StartCoroutine("obtainMap");
 
         if (!isShowing)
         {
@@ -80,7 +82,7 @@ public class UpdateGPS : MonoBehaviour
 
     private void obtainLocations()
     {
-        UnityEngine.Debug.Log("Creating request");
+        UnityEngine.Debug.Log("Creating request obtain locations");
         WebRequest wrGET = WebRequest.Create(serverUrl+ "/location/list");
 
         Stream objStream = wrGET.GetResponse().GetResponseStream();
@@ -92,7 +94,7 @@ public class UpdateGPS : MonoBehaviour
 
     private void obtainAllInfo(long id)
     {
-        UnityEngine.Debug.Log("Creating request");
+        UnityEngine.Debug.Log("Creating request obtain all info");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/"+id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
@@ -103,7 +105,7 @@ public class UpdateGPS : MonoBehaviour
 
     private void obtainRepVideo(long id)
     {
-        UnityEngine.Debug.Log("Creating request");
+        UnityEngine.Debug.Log("Creating request obtain video");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/video/" + id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
@@ -115,13 +117,17 @@ public class UpdateGPS : MonoBehaviour
 
     private void obtainRepImage(long id)
     {
-        UnityEngine.Debug.Log("Creating request");
+        UnityEngine.Debug.Log("Creating request obtain image");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
-        UnityEngine.Debug.Log(data);
-        configureNearButton(serverUrl+data);
+        //UnityEngine.Debug.Log(data);
+        UnityEngine.Debug.Log(nearLocation1.gameObject.activeInHierarchy);
+        if (!nearLocation1.gameObject.activeInHierarchy)
+        {
+            StartCoroutine("configureNearButton", serverUrl+data);
+        }
     }
 
     private IEnumerator configureNearButton(String image)
@@ -131,6 +137,14 @@ public class UpdateGPS : MonoBehaviour
         yield return www;
         nearLocation1.image.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
         nearLocation1.gameObject.SetActive(true);
+    }
+
+    private IEnumerator obtainMap()
+    {
+        UnityEngine.Debug.Log(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2);
+        WWW www = new WWW(exampleUrl1+ GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl2);
+        yield return www;
+        map.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
     private void parseLocation(String data)
