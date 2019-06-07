@@ -12,18 +12,20 @@ using UnityEngine.SceneManagement;
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.38:8080";
+    private String serverUrl = "http://192.168.1.33:8080";
     private ArrayList locations;
     private Representation actualRep;
     private Boolean isShowing;
     string exampleUrl1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
-    string exampleUrl2 = "&zoom=13&size=600x300&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
+    string exampleUrl2 = "&markers=color:blue%7Clabel:You%7C";
+    string exampleUrl3 = "&zoom=20&size=400x1000&maptype=terrain&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
     string key = "&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
 
 
     //User interface
-    public Text coordinates, title, titleRep;
-    public Button showButton, cancelButton, nearLocation1, nearLocation2, nearLocation3;
+    public Text coordinates, title, titleRep, titleInfo, contentInformation;
+    public Button showButton, cancelButton, nearLocation1, nearLocation2, nearLocation3,
+        descriptionButton, historyButton, interestInfo, technicalInfo;
     public GameObject panelShow, panelRepresentation, panelMap, arCamera, representationScreen;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
@@ -33,6 +35,10 @@ public class UpdateGPS : MonoBehaviour
     public UpdateGPS()
     {
         locations = new ArrayList();
+    }
+
+    private void Start()
+    {
         // Obtain locations
         obtainLocations();
     }
@@ -49,7 +55,7 @@ public class UpdateGPS : MonoBehaviour
             {
                 var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
                 UnityEngine.Debug.Log("Distance: " + distance);
-                if (distance < 485559 && actualRep == null && !isShowing) // less 10 meters show
+                if (distance < 4855590 && actualRep == null && !isShowing) // less 10 meters show
                 {
                     UnityEngine.Debug.Log("Location detected");
                     obtainAllInfo(l.id);
@@ -142,7 +148,7 @@ public class UpdateGPS : MonoBehaviour
     private IEnumerator obtainMap()
     {
         UnityEngine.Debug.Log(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2);
-        WWW www = new WWW(exampleUrl1+ GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl2);
+        WWW www = new WWW(exampleUrl1+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl2+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl3);
         yield return www;
         map.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
@@ -188,13 +194,31 @@ public class UpdateGPS : MonoBehaviour
     private void showScene()
     {
         panelRepresentation.gameObject.SetActive(true);
-        arCamera.SetActive(true);
+        if (PlayerPrefs.GetInt("AR_mode") == 1)
+        {
+            arCamera.SetActive(true);
+        }
         representationScreen.SetActive(true);
         panelShow.gameObject.SetActive(false);
         panelMap.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
         titleRep.text = actualRep.title;
         reproduceVideo(actualRep.videoURL);
+        configureInformationPanel();
+    }
+
+    private void configureInformationPanel() {
+        titleInfo.text = actualRep.title;
+        contentInformation.text = actualRep.description; //Default
+        descriptionButton.onClick.AddListener(delegate { showContentInfo(actualRep.description); });
+        historyButton.onClick.AddListener(delegate { showContentInfo(actualRep.history); });
+        interestInfo.onClick.AddListener(delegate { showContentInfo(actualRep.interestInfo); });
+        technicalInfo.onClick.AddListener(delegate { showContentInfo(actualRep.interestInfo); });
+    }
+
+    private void showContentInfo(String info)
+    {
+        contentInformation.text = info;
     }
 
     private void configureCancelButton()
