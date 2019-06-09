@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.33:8080";
+    private String serverUrl = "http://192.168.1.34:8080";
     private ArrayList locations;
     private Representation actualRep;
     private Boolean isShowing;
@@ -42,40 +42,46 @@ public class UpdateGPS : MonoBehaviour
     {
         // Obtain locations
         obtainLocations();
+        StartCoroutine(refreshLocation());
     }
 
-    private void Update()
+    private IEnumerator refreshLocation()
     {
-        var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude, 0);
-        coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
-        StartCoroutine("obtainMap");
+        while (true) {
+            UnityEngine.Debug.Log("Refreshing location of the device.");
+            var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude, 0);
+            coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
+            StartCoroutine("obtainMap");
 
-        if (!isShowing)
-        {
-            foreach (Location l in locations)
+            if (!isShowing)
             {
-                var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
-                UnityEngine.Debug.Log("Distance: " + distance);
-                if (distance < 4855590 && actualRep == null && !isShowing) // less 10 meters show
+                foreach (Location l in locations)
                 {
-                    UnityEngine.Debug.Log("Location detected");
-                    obtainAllInfo(l.id);
-                    obtainRepVideo(l.id);
-                    isShowing = true;
+                    var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
+                    if (distance < 4855590 && actualRep == null && !isShowing) // less 10 meters show
+                    {
+                        UnityEngine.Debug.Log("Location detected");
+                        obtainAllInfo(l.id);
+                        obtainRepVideo(l.id);
+                        isShowing = true;
+                    }
+                    else //if (distance < 5000000) // less 30 meters show as near location
+                    {
+                        UnityEngine.Debug.Log("Near location detected");
+                        obtainRepImage(l.id);
+                    }
+                    /*else
+                    {
+                        actualRep = null;
+                        title.text = "";
+                        videoPlayer.Stop();
+                        renderer.enabled = false;
+                    }*/
                 }
-                else //if (distance < 5000000) // less 30 meters show as near location
-                {
-                    UnityEngine.Debug.Log("Near location detected");
-                    obtainRepImage(l.id);
-                }
-                /*else
-                {
-                    actualRep = null;
-                    title.text = "";
-                    videoPlayer.Stop();
-                    renderer.enabled = false;
-                }*/
+
             }
+
+            yield return new WaitForSeconds(10.0f); //Wait 
         }
     }
 
