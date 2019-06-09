@@ -3723,7 +3723,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 831029134}
   panel: {fileID: 1845157849}
-  isOpen: 0
+  isOpen: 1
 --- !u!1 &836246307
 GameObject:
   m_ObjectHideFlags: 0
