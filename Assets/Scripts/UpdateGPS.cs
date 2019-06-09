@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.SceneManagement;
+using System.Runtime.Serialization;
 
 
 public class UpdateGPS : MonoBehaviour
@@ -26,7 +27,7 @@ public class UpdateGPS : MonoBehaviour
     public Text coordinates, title, titleRep, titleInfo, contentInformation;
     public Button showButton, cancelButton, nearLocation1, nearLocation2, nearLocation3,
         descriptionButton, historyButton, interestInfo, technicalInfo;
-    public GameObject panelShow, panelRepresentation, panelMap, arCamera, representationScreen;
+    public GameObject panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
@@ -197,6 +198,9 @@ public class UpdateGPS : MonoBehaviour
         if (PlayerPrefs.GetInt("AR_mode") == 1)
         {
             arCamera.SetActive(true);
+        } else
+        {
+            camera.SetActive(true);
         }
         representationScreen.SetActive(true);
         panelShow.gameObject.SetActive(false);
@@ -266,8 +270,9 @@ public class Representation
     public string history { get; set; }
     public string interestInfo { get; set; }
     public string technicalInfo { get; set; }
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
+    public double latitude { get; set; }
+    public double longitude { get; set; }
+
     public string videoURL { get; set; }
 
     public Representation(long id, string title, string des, string hist, string interest, string techn, double lat, double longi)
@@ -277,8 +282,8 @@ public class Representation
         this.description = des;
         this.history = hist;
         this.technicalInfo = techn;
-        this.Latitude = lat;
-        this.Longitude = longi;
+        this.latitude = lat;
+        this.longitude = longi;
     }
 }
 
