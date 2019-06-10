@@ -13,7 +13,7 @@ using UnityEngine.Video;
 public class VirtualVisit : MonoBehaviour
 {
 
-    private String serverUrl = "http://192.168.1.34:8080";
+    private String serverUrl = "http://192.168.1.36:8080";
 
     public Text titleRep, titleInfo, contentInformation;
     public Button cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;

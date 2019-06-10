@@ -13,25 +13,24 @@ using System.Runtime.Serialization;
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.34:8080";
+    private String serverUrl = "http://192.168.1.36:8080";
     private ArrayList locations;
     private Representation actualRep;
     private Boolean isShowing;
     string exampleUrl1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
     string exampleUrl2 = "&markers=color:blue%7Clabel:You%7C";
-    string exampleUrl3 = "&zoom=20&size=400x1000&maptype=terrain&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
+    string exampleUrl3 = "&zoom=17&size=700x700&maptype=terrain&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
     string key = "&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
 
 
     //User interface
     public Text coordinates, title, titleRep, titleInfo, contentInformation;
-    public Button showButton, cancelButton, nearLocation1, nearLocation2, nearLocation3,
-        descriptionButton, historyButton, interestInfo, technicalInfo;
+    public Button showButton, cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
     public GameObject panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
-    public Image map;
+    public Image map, nearLocation1, nearLocation2, nearLocation3;
 
     public UpdateGPS()
     {
@@ -148,7 +147,7 @@ public class UpdateGPS : MonoBehaviour
         UnityEngine.Debug.Log(image);
         WWW www = new WWW(image);
         yield return www;
-        nearLocation1.image.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
+        nearLocation1.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
         nearLocation1.gameObject.SetActive(true);
     }
 
