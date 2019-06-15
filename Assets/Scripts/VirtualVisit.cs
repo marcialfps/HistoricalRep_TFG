@@ -13,7 +13,7 @@ using UnityEngine.Video;
 public class VirtualVisit : MonoBehaviour
 {
 
-    private String serverUrl = "http://192.168.1.36:8080";
+    private String serverUrl = "http://192.168.1.35:8080";
 
     public Text titleRep, titleInfo, contentInformation;
     public Button cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
@@ -31,7 +31,10 @@ public class VirtualVisit : MonoBehaviour
     {
         obtainAllRepresentations();
         foreach (Representation r in representations)
+        {
             obtainRepVideo(r);
+            obtainRepImage(r);
+        }
         configureUI();
     }
 
@@ -62,6 +65,16 @@ public class VirtualVisit : MonoBehaviour
         r.videoURL = data;
     }
 
+    private void obtainRepImage(Representation r)
+    {
+        UnityEngine.Debug.Log("Creating request obtain image");
+        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + r.id);
+        Stream objStream = wrGET.GetResponse().GetResponseStream();
+        StreamReader objReader = new StreamReader(objStream);
+        String data = objReader.ReadLine();
+        r.imageURL = data;
+    }
+
     private void configureUI()
     {
         int i = 0;
@@ -69,15 +82,25 @@ public class VirtualVisit : MonoBehaviour
             if(i == 0)
             {
                 sampleButton.GetComponentInChildren<Text>().text = r.title;
+                StartCoroutine(configureImage(r, sampleButton));
                 sampleButton.onClick.AddListener(delegate { reproduceRep(r); });
                 i = 1;
             } else
             {
                 var button = (Button)GameObject.Instantiate(this.sampleButton);
                 button.GetComponentInChildren<Text>().text = r.title;
+                StartCoroutine(configureImage(r, button));
                 button.onClick.AddListener(delegate { reproduceRep(r); });
                 button.transform.SetParent(buttonContent.transform);
             }
+    }
+
+    private IEnumerator configureImage(Representation r, Button b)
+    {
+        UnityEngine.Debug.Log(r.imageURL);
+        WWW www = new WWW(serverUrl+r.imageURL);
+        yield return www;
+        b.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
     private void reproduceRep(Representation r)

@@ -5,13 +5,14 @@ using UnityEngine.UI;
 
 public class ManageLocalData : MonoBehaviour {
 
-    public Toggle modeARToggle;
+    public Toggle modeARToggle, repNarrationToggle;
     public Dropdown languageDropdown;
 
 	// Use this for initialization
 	void Start () {
         configureToggleAR();
         configureDropdownLanguage();
+        configureToggleNarration();
     }
 
     /* UI CONFIGURATION */
@@ -33,6 +34,15 @@ public class ManageLocalData : MonoBehaviour {
             languageDropdown.value = 1;
     }
 
+    private void configureToggleNarration()
+    {
+        repNarrationToggle.onValueChanged.AddListener(delegate { saveNarration(); });
+        if (loadNarration() == 1)
+            repNarrationToggle.isOn = true;
+        else
+            repNarrationToggle.isOn = false;
+    }
+
     /* DATA SAVE */
 
     // 1 is true and 0 is false
@@ -42,6 +52,16 @@ public class ManageLocalData : MonoBehaviour {
             PlayerPrefs.SetInt("AR_mode", 1);
         else
             PlayerPrefs.SetInt("AR_mode", 0);
+
+        PlayerPrefs.Save();
+    }
+
+    private void saveNarration()
+    {
+        if (repNarrationToggle.isOn)
+            PlayerPrefs.SetInt("Narration", 1);
+        else
+            PlayerPrefs.SetInt("Narration", 0);
 
         PlayerPrefs.Save();
     }
@@ -67,5 +87,10 @@ public class ManageLocalData : MonoBehaviour {
     private string loadLanguage()
     {
         return PlayerPrefs.GetString("Language");
+    }
+
+    private int loadNarration()
+    {
+        return PlayerPrefs.GetInt("Narration");
     }
 }

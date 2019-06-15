@@ -13,24 +13,23 @@ using System.Runtime.Serialization;
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.36:8080";
+    private String serverUrl = "http://192.168.1.35:8080";
     private ArrayList locations;
     private Representation actualRep;
     private Boolean isShowing;
     string exampleUrl1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
     string exampleUrl2 = "&markers=color:blue%7Clabel:You%7C";
-    string exampleUrl3 = "&zoom=17&size=700x700&maptype=terrain&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
-    string key = "&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
+    string exampleUrl3 = "&zoom=17&size=700x500&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
 
 
     //User interface
-    public Text coordinates, title, titleRep, titleInfo, contentInformation;
+    public Text title, titleRep, titleInfo, contentInformation;
     public Button showButton, cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
-    public GameObject panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen;
+    public GameObject panelOptions, panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
-    public Image map, nearLocation1, nearLocation2, nearLocation3;
+    public Image map, nearLocation1, nearLocation2, nearLocation3, actualLocationImage;
 
     public UpdateGPS()
     {
@@ -49,7 +48,6 @@ public class UpdateGPS : MonoBehaviour
         while (true) {
             UnityEngine.Debug.Log("Refreshing location of the device.");
             var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude, 0);
-            coordinates.text = "Lat: " + GPS.Instance.latitude + "\nLon: " + GPS.Instance.longitude;
             StartCoroutine("obtainMap");
 
             if (!isShowing)
@@ -153,7 +151,7 @@ public class UpdateGPS : MonoBehaviour
 
     private IEnumerator obtainMap()
     {
-        UnityEngine.Debug.Log(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2);
+        UnityEngine.Debug.Log(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl3);
         WWW www = new WWW(exampleUrl1+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl2+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl3);
         yield return www;
         map.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
@@ -210,6 +208,7 @@ public class UpdateGPS : MonoBehaviour
         representationScreen.SetActive(true);
         panelShow.gameObject.SetActive(false);
         panelMap.gameObject.SetActive(false);
+        panelOptions.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
         titleRep.text = actualRep.title;
         reproduceVideo(actualRep.videoURL);
@@ -219,10 +218,20 @@ public class UpdateGPS : MonoBehaviour
     private void configureInformationPanel() {
         titleInfo.text = actualRep.title;
         contentInformation.text = actualRep.description; //Default
+        StartCoroutine("configureImage", serverUrl + "/images/img-" + actualRep.id + ".png");
         descriptionButton.onClick.AddListener(delegate { showContentInfo(actualRep.description); });
         historyButton.onClick.AddListener(delegate { showContentInfo(actualRep.history); });
         interestInfo.onClick.AddListener(delegate { showContentInfo(actualRep.interestInfo); });
         technicalInfo.onClick.AddListener(delegate { showContentInfo(actualRep.interestInfo); });
+    }
+
+    private IEnumerator configureImage(String image)
+    {
+        UnityEngine.Debug.Log(image);
+        WWW www = new WWW(image);
+        yield return www;
+        actualLocationImage.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
+        actualLocationImage.gameObject.SetActive(true);
     }
 
     private void showContentInfo(String info)
@@ -279,6 +288,7 @@ public class Representation
     public double longitude { get; set; }
 
     public string videoURL { get; set; }
+    public string imageURL { get; set; }
 
     public Representation(long id, string title, string des, string hist, string interest, string techn, double lat, double longi)
     {

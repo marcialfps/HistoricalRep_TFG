@@ -6,15 +6,13 @@ using UnityEngine.Video;
 
 public class Player : MonoBehaviour {
 
-    public Button playpauseBtn, cancelBtn, stopBtn;
-    public RawImage playpause, cancel, stop;
+    public Button playpauseBtn;
+    public RawImage playpause;
     public Texture play, pause;
     public VideoPlayer videoplayer;
 
 	void Start() {
         playpauseBtn.onClick.AddListener(pauseVideo);
-        cancelBtn.onClick.AddListener(cancelVideo);
-        stopBtn.onClick.AddListener(stopVideo);
     }
 	
 	void playVideo() {
@@ -28,15 +26,5 @@ public class Player : MonoBehaviour {
         videoplayer.Pause();
         playpauseBtn.onClick.AddListener(playVideo);
         playpause.texture = play;
-    }
-
-    void cancelVideo()
-    {
-        //TO-DO
-    }
-
-    void stopVideo()
-    {
-        videoplayer.Stop();
     }
 }
