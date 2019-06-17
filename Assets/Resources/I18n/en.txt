@@ -1,0 +1,16 @@
+realVisit=Real visit
+virtualVisit=Virtual visit
+settings=Settings
+yourLocation=Your location
+nearLocations=Near locations
+availableLocation=Available location
+description=Description
+history=History
+interest=Interest
+technical=Technical
+arMode=AR mode
+language=Language
+representationNarration=Representation narration
+english=English
+spanish=Spanish
+allRepresentations=All representations

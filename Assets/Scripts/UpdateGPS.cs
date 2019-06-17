@@ -9,11 +9,12 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.SceneManagement;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.35:8080";
+    private String serverUrl = "http://192.168.1.39:8080";
     private ArrayList locations;
     private Representation actualRep;
     private Boolean isShowing;
@@ -99,7 +100,8 @@ public class UpdateGPS : MonoBehaviour
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
         UnityEngine.Debug.Log(data);
-        parseLocation(data);
+        List<Location> deserializedList = JsonConvert.DeserializeObject<List<Location>>(data);
+        this.locations = new ArrayList(deserializedList);
     }
 
     private void obtainAllInfo(long id)
@@ -110,7 +112,8 @@ public class UpdateGPS : MonoBehaviour
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
         UnityEngine.Debug.Log(data);
-        parseRepresentationInfo(data);
+        List<Representation> deserializedList = JsonConvert.DeserializeObject<List<Representation>>(data);
+        this.actualRep = deserializedList[0];
     }
 
     private void obtainRepVideo(long id)
@@ -155,44 +158,6 @@ public class UpdateGPS : MonoBehaviour
         WWW www = new WWW(exampleUrl1+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl2+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl3);
         yield return www;
         map.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
-    }
-
-    private void parseLocation(String data)
-    {
-        // Remove [ ]
-        String data2 = data.Trim(new Char[] { '[',']' });
-
-        foreach (String l in data2.Split(','))
-        {
-            // Remove { }
-            String l1 = l.Trim(new Char[] { '{', '}', ' '});
-            UnityEngine.Debug.Log(l1);
-
-            string[] aux = l1.Split(';');
-            double lat = Convert.ToDouble(aux[0]);
-            double lon = Convert.ToDouble(aux[1]);
-            long id = Convert.ToInt64(aux[2]);
-
-            this.locations.Add(new Location(lat, lon, id));
-        }
-    }
-
-    private void parseRepresentationInfo(String data)
-    {
-        // Remove { }
-        String data2 = data.Trim(new Char[] { '{', '}' });
-
-        string[] l = data2.Split(',');
-        long id = Convert.ToInt64(l[0].Split(':')[1]);
-        string title = l[1].Split(':')[1];
-        string description = l[2].Split(':')[1];
-        string history = l[3].Split(':')[1];
-        string interestInfo = l[4].Split(':')[1];
-        string technicalInfo = l[5].Split(':')[1];
-        double latitude = Convert.ToDouble(l[6].Split(':')[1]);
-        double longitude = Convert.ToDouble(l[6].Split(':')[1]);
-
-        this.actualRep = new Representation(id, title, description, history, interestInfo, technicalInfo, latitude, longitude);
     }
 
     private void showScene()

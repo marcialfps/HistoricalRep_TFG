@@ -13,13 +13,14 @@ using UnityEngine.Video;
 public class VirtualVisit : MonoBehaviour
 {
 
-    private String serverUrl = "http://192.168.1.35:8080";
+    private String serverUrl = "http://192.168.1.39:8080";
 
     public Text titleRep, titleInfo, contentInformation;
     public Button cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
     public Button sampleButton;
     public GameObject buttonContent;
-    public GameObject panelVirtualVisit, panelRepresentation, panelMenu, panelMap, arCamera, camera, representationScreen;
+    public GameObject panelVirtualVisit, panelRepresentation, panelOptions,
+        arCamera, camera, representationScreen;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
@@ -117,8 +118,7 @@ public class VirtualVisit : MonoBehaviour
         }
         representationScreen.SetActive(true);
         panelVirtualVisit.gameObject.SetActive(false);
-        panelMenu.gameObject.SetActive(false);
-        panelMap.gameObject.SetActive(false);
+        panelOptions.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
         titleRep.text = r.title;
         reproduceVideo(serverUrl+r.videoURL);

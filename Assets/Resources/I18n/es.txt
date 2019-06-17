@@ -1,0 +1,16 @@
+realVisit=Visita real
+virtualVisit=Visita virtual
+settings=Ajustes
+yourLocation=Tu localización
+nearLocations=Localizaciones cercanas
+availableLocation=Localización disponible
+description=Descripción
+history=Historia
+interest=Interés
+technical=Técnica
+arMode=Modo RA
+language=Idioma
+representationNarration=Narración de representación
+english=Inglés
+spanish=Español
+allRepresentations=Todas las representaciones
