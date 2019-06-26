@@ -13,7 +13,7 @@ using UnityEngine.Video;
 public class VirtualVisit : MonoBehaviour
 {
 
-    private String serverUrl = "http://192.168.1.39:8080";
+    private String serverUrl = "http://192.168.1.35:8080";
 
     public Text titleRep, titleInfo, contentInformation;
     public Button cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
@@ -123,6 +123,8 @@ public class VirtualVisit : MonoBehaviour
         titleRep.text = r.title;
         reproduceVideo(serverUrl+r.videoURL);
         configureInformationPanel(r);
+        TextToSpeech tts = (new GameObject("TextToSpeechObject")).AddComponent<TextToSpeech>();
+        tts.launchTTS(r.description, audioSource);
     }
 
     private void configureInformationPanel(Representation r)

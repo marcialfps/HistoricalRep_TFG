@@ -3,6 +3,7 @@ virtualVisit=Virtual visit
 settings=Settings
 yourLocation=Your location
 nearLocations=Near locations
+noNearLocations=Not detected near locations
 availableLocation=Available location
 description=Description
 history=History

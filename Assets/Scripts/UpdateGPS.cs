@@ -14,36 +14,60 @@ using Newtonsoft.Json;
 
 public class UpdateGPS : MonoBehaviour
 {
-    private String serverUrl = "http://192.168.1.39:8080";
-    private ArrayList locations;
+    
+    /**
+     * URLs of the server and the maps API.
+     */
+    private String serverUrl = "http://192.168.1.35:8080";
+    string urlMaps1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
+    string urlMaps2 = "&markers=color:blue%7Clabel:You%7C";
+    string urlMaps3 = "&zoom=17&size=700x500&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
+
+    /**
+     * Private fields of the Script.
+     */
+    private ArrayList locations, nearLocations;
     private Representation actualRep;
     private Boolean isShowing;
-    string exampleUrl1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
-    string exampleUrl2 = "&markers=color:blue%7Clabel:You%7C";
-    string exampleUrl3 = "&zoom=17&size=700x500&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
 
 
-    //User interface
-    public Text title, titleRep, titleInfo, contentInformation;
+
+    /**
+     * UI elements.
+     */
+    public Text title, titleRep, titleInfo, contentInformation, textNoNearLocations;
     public Button showButton, cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
-    public GameObject panelOptions, panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen;
+    public GameObject panelOptions, panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen,
+        maskNearLocation1, marskNearLocation2;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
-    public Image map, nearLocation1, nearLocation2, nearLocation3, actualLocationImage;
+    public Image map, actualLocationImage;
 
+    /**
+     * When created, the private fields are initialized.
+     */
     public UpdateGPS()
     {
         locations = new ArrayList();
+        nearLocations = new ArrayList();
     }
 
+    /**
+     * When started, first we obtain all the locations from the server and launch the process
+     * of refresh the location.
+     */
     private void Start()
     {
-        // Obtain locations
         obtainLocations();
         StartCoroutine(refreshLocation());
     }
 
+    /**
+     * This process is executed each 10 seconds. First, the location of the device is updated,
+     * after that, we obtain the map. Later, the go through the locations and we configure the 
+     * UI depending if we have a location to show or a near location. 
+     */
     private IEnumerator refreshLocation()
     {
         while (true) {
@@ -56,30 +80,35 @@ public class UpdateGPS : MonoBehaviour
                 foreach (Location l in locations)
                 {
                     var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
-                    if (distance < 4855590 && actualRep == null && !isShowing) // less 10 meters show
+                    if (distance < 20 && actualRep == null && !isShowing) // less 20 meters show
                     {
-                        UnityEngine.Debug.Log("Location detected");
+                        UnityEngine.Debug.Log("Location detected at "+distance+" meters.");
                         obtainAllInfo(l.id);
                         obtainRepVideo(l.id);
                         isShowing = true;
                     }
-                    else //if (distance < 5000000) // less 30 meters show as near location
+                    else if (distance < 100) // less 100 meters show as near location
                     {
-                        UnityEngine.Debug.Log("Near location detected");
-                        obtainRepImage(l.id);
-                    }
-                    /*else
+                        UnityEngine.Debug.Log("Near location detected at "+distance+" meters.");
+                        l.distance = distance;
+                        obtainRepImage(l);
+                        nearLocations.Add(l);
+                    } else
                     {
                         actualRep = null;
-                        title.text = "";
-                        videoPlayer.Stop();
-                        renderer.enabled = false;
-                    }*/
+                    }
                 }
-
+                
+                configureNearLocations();
+                if (actualRep == null)
+                {
+                    panelShow.SetActive(false);
+                    videoPlayer.Stop();
+                    renderer.enabled = false;
+                }
             }
 
-            yield return new WaitForSeconds(10.0f); //Wait 
+            yield return new WaitForSeconds(10.0f); //Wait 10 seconds
         }
     }
 
@@ -106,7 +135,7 @@ public class UpdateGPS : MonoBehaviour
 
     private void obtainAllInfo(long id)
     {
-        UnityEngine.Debug.Log("Creating request obtain all info");
+        UnityEngine.Debug.Log("Creating request obtain all info of representation "+id+".");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/"+id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
@@ -118,7 +147,7 @@ public class UpdateGPS : MonoBehaviour
 
     private void obtainRepVideo(long id)
     {
-        UnityEngine.Debug.Log("Creating request obtain video");
+        UnityEngine.Debug.Log("Creating request obtain video of representation "+id+".");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/video/" + id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
@@ -128,34 +157,50 @@ public class UpdateGPS : MonoBehaviour
         configureUI();
     }
 
-    private void obtainRepImage(long id)
+    private void obtainRepImage(Location l)
     {
-        UnityEngine.Debug.Log("Creating request obtain image");
-        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + id);
+        UnityEngine.Debug.Log("Creating request obtain image of near representation "+l.id+".");
+        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + l.id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
-        //UnityEngine.Debug.Log(data);
-        UnityEngine.Debug.Log(nearLocation1.gameObject.activeInHierarchy);
+        l.image = data;
+        /*
         if (!nearLocation1.gameObject.activeInHierarchy)
         {
-            StartCoroutine("configureNearButton", serverUrl+data);
+            StartCoroutine("configureNearImage", serverUrl+data);
+        }*/
+    }
+
+    private void configureNearLocations()
+    {
+        UnityEngine.Debug.Log("Configuring near locations.");
+        if (nearLocations.Count > 0)
+        {
+            nearLocations.Sort();
+            StartCoroutine(configureNearImage(((Location)nearLocations[0]).image, maskNearLocation1));
+            if (nearLocations.Count > 1)
+                StartCoroutine(configureNearImage(((Location)nearLocations[1]).image, marskNearLocation2));
+            textNoNearLocations.gameObject.SetActive(false);
+        } else
+        {
+            textNoNearLocations.gameObject.SetActive(true);
         }
     }
 
-    private IEnumerator configureNearButton(String image)
+    private IEnumerator configureNearImage(String image, GameObject i)
     {
-        UnityEngine.Debug.Log(image);
-        WWW www = new WWW(image);
+        UnityEngine.Debug.Log(serverUrl+image);
+        WWW www = new WWW(serverUrl+image);
         yield return www;
-        nearLocation1.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
-        nearLocation1.gameObject.SetActive(true);
+        i.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
+        i.gameObject.SetActive(true);
     }
 
     private IEnumerator obtainMap()
     {
-        UnityEngine.Debug.Log(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl3);
-        WWW www = new WWW(exampleUrl1+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl2+GPS.Instance.latitude+","+GPS.Instance.longitude+exampleUrl3);
+        UnityEngine.Debug.Log(urlMaps1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + urlMaps2 + GPS.Instance.latitude + "," + GPS.Instance.longitude + urlMaps3);
+        WWW www = new WWW(urlMaps1+GPS.Instance.latitude+","+GPS.Instance.longitude+urlMaps2+GPS.Instance.latitude+","+GPS.Instance.longitude+urlMaps3);
         yield return www;
         map.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
@@ -178,6 +223,8 @@ public class UpdateGPS : MonoBehaviour
         titleRep.text = actualRep.title;
         reproduceVideo(actualRep.videoURL);
         configureInformationPanel();
+        TextToSpeech tts = (new GameObject("TextToSpeechObject")).AddComponent<TextToSpeech>();
+        tts.launchTTS(actualRep.description, audioSource);
     }
 
     private void configureInformationPanel() {
@@ -227,17 +274,25 @@ public class UpdateGPS : MonoBehaviour
     }
 }
 
-public class Location
+public class Location: IComparable
 {
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public long id { get; set; }
+
+    public double distance { get; set; }
+    public String image { get; set; }
 
     public Location(double latitude, double longitude, long id)
     {
         this.Latitude = latitude;
         this.Longitude = longitude;
         this.id = id;
+    }
+
+    public int CompareTo(object l2)
+    {
+        return Convert.ToInt32(((Location)l2).distance - this.distance);
     }
 }
 
@@ -309,26 +364,5 @@ public class UnitOfLength
     public double ConvertFromMiles(double input)
     {
         return input * _fromMilesFactor;
-    }
-}
-
-/* GOOGLE MAPS */
-public class MyGoogleMaps : MonoBehaviour
-{
-
-    string exampleUrl1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
-    string exampleUrl2 = "&zoom=13&size=600x300&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
-    string key = "&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
-    public RawImage image;
-
-    IEnumerator Start()
-    {
-        if (GPS.Instance != null)
-        {
-            WWW www = new WWW(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2 + key);
-            UnityEngine.Debug.Log(exampleUrl1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + exampleUrl2 + key);
-            yield return www;
-            image.texture = www.texture;
-        }
     }
 }

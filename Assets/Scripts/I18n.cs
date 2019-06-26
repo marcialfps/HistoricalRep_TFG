@@ -44,7 +44,7 @@ class I18n : MonoBehaviour
     /// <summary>
     /// Load language files from ressources
     /// </summary>
-    private static void LoadLanguage()
+    public static void LoadLanguage()
     {
         if (Fields == null)
             Fields = new Dictionary<string, string>();
@@ -92,6 +92,13 @@ class I18n : MonoBehaviour
     /// <returns>The 2-letter ISO code from system language.</returns>
     public static string Get2LetterISOCodeFromSystemLanguage()
     {
+        if (PlayerPrefs.GetString("Language") == "English" ) {
+            return "EN";
+        } else if (PlayerPrefs.GetString("Language") == "Spanish")
+        {
+            return "ES";
+        }
+
         SystemLanguage lang = Application.systemLanguage;
         string res = "EN";
         switch (lang)

@@ -28,6 +28,7 @@ public class ManageLocalData : MonoBehaviour {
 
     private void configureDropdownLanguage()
     {
+        languageDropdown.onValueChanged.AddListener(delegate { saveLanguage(); });
         if (loadLanguage().Equals("English"))
             languageDropdown.value = 0;
         else
@@ -66,16 +67,18 @@ public class ManageLocalData : MonoBehaviour {
         PlayerPrefs.Save();
     }
 
-    private void saveLanguageEng()
+    private void saveLanguage()
     {
-        PlayerPrefs.SetString("Language", "English");
+        if (languageDropdown.value == 0)
+        {
+            PlayerPrefs.SetString("Language", "English");
+        } else
+        {
+            PlayerPrefs.SetString("Language", "Spanish");
+        }
+        
         PlayerPrefs.Save();
-    }
-
-    private void saveLanguageSpa()
-    {
-        PlayerPrefs.SetString("Language", "Spanish");
-        PlayerPrefs.Save();
+        I18n.LoadLanguage();
     }
 
     /* DATA LOAD */
