@@ -77,42 +77,39 @@ public class UpdateGPS : MonoBehaviour
             var coordactual = new Location(GPS.Instance.latitude, GPS.Instance.longitude, 0);
             StartCoroutine("obtainMap");
 
-            if (!isShowing)
+            foreach (Location l in locations)
             {
-                foreach (Location l in locations)
+                var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
+                if (distance < 20000 && actualRep == null) // less 20 meters show
                 {
-                    var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
-                    if (distance < 20000 && actualRep == null && !isShowing) // less 20 meters show
-                    {
-                        UnityEngine.Debug.Log("Location detected at "+distance+" meters.");
-                        obtainAllInfo(l.id);
-                        obtainRepVideo(l.id);
-                        obtainRepImage(l.id);
-                        isShowing = true;
-                    }
-                    else if (distance < 30000) // less 200 meters show as near location
-                    {
-                        UnityEngine.Debug.Log("Near location detected at "+distance+" meters.");
-                        obtainLocationImage(l);
-                        nearLocations.Add(l);
-                        l.distance = distance;
-                    }
-                    else if (!isShowing)
-                    {
-                        actualRep = null;
-                    }
+                    UnityEngine.Debug.Log("Location detected at "+distance+" meters.");
+                    obtainAllInfo(l.id);
+                    obtainRepVideo(l.id);
+                    obtainRepImage(l.id);
+                    isShowing = true;
                 }
+                else if (distance < 30000) // less 200 meters show as near location
+                {
+                    UnityEngine.Debug.Log("Near location detected at "+distance+" meters.");
+                    obtainLocationImage(l);
+                    nearLocations.Add(l);
+                    l.distance = distance;
+                }
+                else if (!isShowing)
+                {
+                    actualRep = null;
+                }
+            }
                 
-                configureNearLocations();
-                if (actualRep == null)
-                {
-                    panelShow.SetActive(false);
-                    videoPlayer.Stop();
-                    renderer.enabled = false;
-                } else
-                {
-                    configureUI();
-                }
+            configureNearLocations();
+            if (actualRep == null)
+            {
+                panelShow.SetActive(false);
+                videoPlayer.Stop();
+                renderer.enabled = false;
+            } else
+            {
+                configureUI();
             }
 
             yield return new WaitForSeconds(10.0f); //Wait 10 seconds

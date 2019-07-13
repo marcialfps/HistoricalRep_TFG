@@ -8,6 +8,7 @@ public class ManageLocalData : MonoBehaviour {
 
     public Toggle modeARToggle, repNarrationToggle;
     public Dropdown languageDropdown;
+    public Canvas canvasActual;
 
 	// Use this for initialization
 	void Start () {
@@ -82,6 +83,8 @@ public class ManageLocalData : MonoBehaviour {
         PlayerPrefs.Save();
         //I18n.LoadLanguage();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        UnityEngine.Debug.Log(SceneManager.sceneCount);
+        canvasActual.gameObject.SetActive(false);
     }
 
     /* DATA LOAD */
