@@ -15,3 +15,7 @@ representationNarration=Narracion de representacion
 english=Ingles
 spanish=Espanol
 allRepresentations=Todas las representaciones
+information=Informacion
+legalInformation=Informacion legal
+appInfo=Esta aplicacion fue desarrollada por Marcial Francisco Parrilla Socas como trabajo fin de grado en ingenieria informatica del software en la Universidad de Oviedo.\n\nEsta aplicacion esta desarrollada en Unity y usa Vuforia para usar las tecnologias de realidad aumentada.
+legalInfo=Toda la informacion relacionada con la localizacion del usuario y camara no es almacenada por la aplicacion. Esta informacion es usada en tiempo de ejecucion por la aplicacion para detectar localizaciones cercanas y ver las representaciones en realidad aumentada.\n\nTodos los videos e imagenes son propiedad de Marcial Fco. Parrilla Socas.\n\nPuedes resolver tus preguntas por: uo251851@uniovi.es

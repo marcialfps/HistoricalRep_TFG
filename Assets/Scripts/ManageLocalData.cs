@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ManageLocalData : MonoBehaviour {
 
@@ -27,12 +28,13 @@ public class ManageLocalData : MonoBehaviour {
     }
 
     private void configureDropdownLanguage()
-    {
-        languageDropdown.onValueChanged.AddListener(delegate { saveLanguage(); });
+    { 
         if (loadLanguage().Equals("English"))
             languageDropdown.value = 0;
         else
             languageDropdown.value = 1;
+
+        languageDropdown.onValueChanged.AddListener(delegate { saveLanguage(); });
     }
 
     private void configureToggleNarration()
@@ -78,7 +80,8 @@ public class ManageLocalData : MonoBehaviour {
         }
         
         PlayerPrefs.Save();
-        I18n.LoadLanguage();
+        //I18n.LoadLanguage();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     /* DATA LOAD */

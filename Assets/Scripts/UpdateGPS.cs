@@ -10,6 +10,8 @@ using UnityEngine.Video;
 using UnityEngine.SceneManagement;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 
 public class UpdateGPS : MonoBehaviour
@@ -18,7 +20,7 @@ public class UpdateGPS : MonoBehaviour
     /**
      * URLs of the server and the maps API.
      */
-    private String serverUrl = "http://192.168.1.35:8080";
+    private String serverUrl = "https://serverhistrep.herokuapp.com";
     string urlMaps1 = "http://maps.googleapis.com/maps/api/staticmap?center=";
     string urlMaps2 = "&markers=color:blue%7Clabel:You%7C";
     string urlMaps3 = "&zoom=17&size=700x500&maptype=roadmap&key=AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE";
@@ -29,7 +31,7 @@ public class UpdateGPS : MonoBehaviour
     private ArrayList locations, nearLocations;
     private Representation actualRep;
     private Boolean isShowing;
-
+    private Translator translator = new Translator();
 
 
     /**
@@ -38,11 +40,11 @@ public class UpdateGPS : MonoBehaviour
     public Text title, titleRep, titleInfo, contentInformation, textNoNearLocations;
     public Button showButton, cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
     public GameObject panelOptions, panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen,
-        maskNearLocation1, marskNearLocation2;
+        maskNearLocation1, marskNearLocation2, maskActualLocation;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
-    public Image map, actualLocationImage;
+    public Image map;
 
     /**
      * When created, the private fields are initialized.
@@ -80,20 +82,22 @@ public class UpdateGPS : MonoBehaviour
                 foreach (Location l in locations)
                 {
                     var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
-                    if (distance < 20 && actualRep == null && !isShowing) // less 20 meters show
+                    if (distance < 20000 && actualRep == null && !isShowing) // less 20 meters show
                     {
                         UnityEngine.Debug.Log("Location detected at "+distance+" meters.");
                         obtainAllInfo(l.id);
                         obtainRepVideo(l.id);
+                        obtainRepImage(l.id);
                         isShowing = true;
                     }
-                    else if (distance < 100) // less 100 meters show as near location
+                    else if (distance < 30000) // less 200 meters show as near location
                     {
                         UnityEngine.Debug.Log("Near location detected at "+distance+" meters.");
-                        l.distance = distance;
-                        obtainRepImage(l);
+                        obtainLocationImage(l);
                         nearLocations.Add(l);
-                    } else
+                        l.distance = distance;
+                    }
+                    else if (!isShowing)
                     {
                         actualRep = null;
                     }
@@ -105,6 +109,9 @@ public class UpdateGPS : MonoBehaviour
                     panelShow.SetActive(false);
                     videoPlayer.Stop();
                     renderer.enabled = false;
+                } else
+                {
+                    configureUI();
                 }
             }
 
@@ -115,13 +122,14 @@ public class UpdateGPS : MonoBehaviour
     private void configureUI()
     {
         UnityEngine.Debug.Log("Configuring UI: "+actualRep.title);
-        title.text = actualRep.title;
+        title.text = translator.translate(actualRep.title);
         panelShow.gameObject.SetActive(true);
         showButton.onClick.AddListener(showScene);
     }
 
     private void obtainLocations()
     {
+        ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
         UnityEngine.Debug.Log("Creating request obtain locations");
         WebRequest wrGET = WebRequest.Create(serverUrl+ "/location/list");
 
@@ -131,6 +139,31 @@ public class UpdateGPS : MonoBehaviour
         UnityEngine.Debug.Log(data);
         List<Location> deserializedList = JsonConvert.DeserializeObject<List<Location>>(data);
         this.locations = new ArrayList(deserializedList);
+    }
+
+    public bool MyRemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+    {
+        bool isOk = true;
+        // If there are errors in the certificate chain, look at each error to determine the cause.
+        if (sslPolicyErrors != SslPolicyErrors.None)
+        {
+            for (int i = 0; i < chain.ChainStatus.Length; i++)
+            {
+                if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
+                {
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+                    bool chainIsValid = chain.Build((X509Certificate2)certificate);
+                    if (!chainIsValid)
+                    {
+                        isOk = false;
+                    }
+                }
+            }
+        }
+        return isOk;
     }
 
     private void obtainAllInfo(long id)
@@ -154,10 +187,20 @@ public class UpdateGPS : MonoBehaviour
         String data = objReader.ReadLine();
         actualRep.videoURL = serverUrl + data;
         UnityEngine.Debug.Log(actualRep.videoURL);
+    }
+
+    private void obtainRepImage(long id)
+    {
+        UnityEngine.Debug.Log("Creating request obtain image of representation " + id + ".");
+        WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + id);
+        Stream objStream = wrGET.GetResponse().GetResponseStream();
+        StreamReader objReader = new StreamReader(objStream);
+        String data = objReader.ReadLine();
+        actualRep.imageURL = serverUrl + data;
         configureUI();
     }
 
-    private void obtainRepImage(Location l)
+    private void obtainLocationImage(Location l)
     {
         UnityEngine.Debug.Log("Creating request obtain image of near representation "+l.id+".");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + l.id);
@@ -165,11 +208,6 @@ public class UpdateGPS : MonoBehaviour
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
         l.image = data;
-        /*
-        if (!nearLocation1.gameObject.activeInHierarchy)
-        {
-            StartCoroutine("configureNearImage", serverUrl+data);
-        }*/
     }
 
     private void configureNearLocations()
@@ -182,7 +220,8 @@ public class UpdateGPS : MonoBehaviour
             if (nearLocations.Count > 1)
                 StartCoroutine(configureNearImage(((Location)nearLocations[1]).image, marskNearLocation2));
             textNoNearLocations.gameObject.SetActive(false);
-        } else
+        }
+        else
         {
             textNoNearLocations.gameObject.SetActive(true);
         }
@@ -190,11 +229,20 @@ public class UpdateGPS : MonoBehaviour
 
     private IEnumerator configureNearImage(String image, GameObject i)
     {
-        UnityEngine.Debug.Log(serverUrl+image);
-        WWW www = new WWW(serverUrl+image);
+        UnityEngine.Debug.Log(serverUrl + image);
+        WWW www = new WWW(serverUrl + image);
         yield return www;
         i.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
         i.gameObject.SetActive(true);
+    }
+
+    private IEnumerator configureImage(String image, GameObject i)
+    {
+        UnityEngine.Debug.Log(serverUrl+image);
+        WWW www = new WWW(image);
+        yield return www;
+        i.gameObject.SetActive(true);
+        i.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
     private IEnumerator obtainMap()
@@ -220,7 +268,7 @@ public class UpdateGPS : MonoBehaviour
         panelMap.gameObject.SetActive(false);
         panelOptions.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
-        titleRep.text = actualRep.title;
+        titleRep.text = translator.translate(actualRep.title);
         reproduceVideo(actualRep.videoURL);
         configureInformationPanel();
         TextToSpeech tts = (new GameObject("TextToSpeechObject")).AddComponent<TextToSpeech>();
@@ -228,27 +276,18 @@ public class UpdateGPS : MonoBehaviour
     }
 
     private void configureInformationPanel() {
-        titleInfo.text = actualRep.title;
-        contentInformation.text = actualRep.description; //Default
-        StartCoroutine("configureImage", serverUrl + "/images/img-" + actualRep.id + ".png");
+        titleInfo.text = translator.translate(actualRep.title);
+        contentInformation.text = translator.translate(actualRep.description); //Default
+        StartCoroutine(configureImage(actualRep.imageURL, maskActualLocation));
         descriptionButton.onClick.AddListener(delegate { showContentInfo(actualRep.description); });
         historyButton.onClick.AddListener(delegate { showContentInfo(actualRep.history); });
         interestInfo.onClick.AddListener(delegate { showContentInfo(actualRep.interestInfo); });
-        technicalInfo.onClick.AddListener(delegate { showContentInfo(actualRep.interestInfo); });
-    }
-
-    private IEnumerator configureImage(String image)
-    {
-        UnityEngine.Debug.Log(image);
-        WWW www = new WWW(image);
-        yield return www;
-        actualLocationImage.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
-        actualLocationImage.gameObject.SetActive(true);
+        technicalInfo.onClick.AddListener(delegate { showContentInfo(actualRep.technicalInfo); });
     }
 
     private void showContentInfo(String info)
     {
-        contentInformation.text = info;
+        contentInformation.text = translator.translate(info);
     }
 
     private void configureCancelButton()

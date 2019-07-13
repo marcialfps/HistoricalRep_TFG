@@ -13,19 +13,21 @@ using UnityEngine.Video;
 public class VirtualVisit : MonoBehaviour
 {
 
-    private String serverUrl = "http://192.168.1.35:8080";
+    private String serverUrl = "https://serverhistrep.herokuapp.com";
 
     public Text titleRep, titleInfo, contentInformation;
-    public Button cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
+    public Button cancelButton, descriptionButton, historyButton, 
+        interestInfo, technicalInfo, buttonCloseRepresentation;
     public Button sampleButton;
     public GameObject buttonContent;
     public GameObject panelVirtualVisit, panelRepresentation, panelOptions,
-        arCamera, camera, representationScreen;
+        arCamera, camera, representationScreen, maskActualLocation;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
 
     private ArrayList representations;
+    private Translator translator = new Translator();
 
     // Use this for initialization
     void Start()
@@ -82,32 +84,46 @@ public class VirtualVisit : MonoBehaviour
         foreach (Representation r in representations)
             if(i == 0)
             {
-                sampleButton.GetComponentInChildren<Text>().text = r.title;
-                StartCoroutine(configureImage(r, sampleButton));
+                sampleButton.GetComponentInChildren<Text>().text = translator.translate(r.title);
+                StartCoroutine(configureImageButton(r, sampleButton));
                 sampleButton.onClick.AddListener(delegate { reproduceRep(r); });
                 i = 1;
             } else
             {
                 var button = (Button)GameObject.Instantiate(this.sampleButton);
-                button.GetComponentInChildren<Text>().text = r.title;
-                StartCoroutine(configureImage(r, button));
+                button.GetComponentInChildren<Text>().text = translator.translate(r.title);
+                StartCoroutine(configureImageButton(r, button));
                 button.onClick.AddListener(delegate { reproduceRep(r); });
                 button.transform.SetParent(buttonContent.transform);
             }
     }
 
-    private IEnumerator configureImage(Representation r, Button b)
+    private IEnumerator configureImageButton(Representation r, Button b)
     {
         UnityEngine.Debug.Log(r.imageURL);
-        WWW www = new WWW(serverUrl+r.imageURL);
+        WWW www = new WWW(serverUrl + r.imageURL);
         yield return www;
         b.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
+    private IEnumerator configureImage(Representation r, GameObject i)
+    {
+        UnityEngine.Debug.Log("HEELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLO");
+        UnityEngine.Debug.Log(serverUrl+r.imageURL);
+        WWW www = new WWW(serverUrl+r.imageURL);
+        yield return www;
+        i.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
+        i.gameObject.SetActive(true);
+    }
+
+
     private void reproduceRep(Representation r)
     {
-       // 
+        // 
+        configureInformationPanel(r);
         panelRepresentation.gameObject.SetActive(true);
+        PanelControl pc = buttonCloseRepresentation.gameObject.GetComponent<PanelControl>();
+        pc.panelToShow1 = panelVirtualVisit;
         if (PlayerPrefs.GetInt("AR_mode") == 1)
         {
             arCamera.SetActive(true);
@@ -116,30 +132,31 @@ public class VirtualVisit : MonoBehaviour
         {
             camera.SetActive(true);
         }
+
         representationScreen.SetActive(true);
         panelVirtualVisit.gameObject.SetActive(false);
         panelOptions.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
-        titleRep.text = r.title;
+        titleRep.text = translator.translate(r.title);
         reproduceVideo(serverUrl+r.videoURL);
-        configureInformationPanel(r);
         TextToSpeech tts = (new GameObject("TextToSpeechObject")).AddComponent<TextToSpeech>();
-        tts.launchTTS(r.description, audioSource);
+        tts.launchTTS(translator.translate(r.description), audioSource);
     }
 
     private void configureInformationPanel(Representation r)
     {
-        titleInfo.text = r.title;
-        contentInformation.text = r.description; //Default
+        StartCoroutine(configureImage(r, maskActualLocation));
+        titleInfo.text = translator.translate(r.title);
+        contentInformation.text = translator.translate(r.description); //Default
         descriptionButton.onClick.AddListener(delegate { showContentInfo(r.description); });
         historyButton.onClick.AddListener(delegate { showContentInfo(r.history); });
         interestInfo.onClick.AddListener(delegate { showContentInfo(r.interestInfo); });
-        technicalInfo.onClick.AddListener(delegate { showContentInfo(r.interestInfo); });
+        technicalInfo.onClick.AddListener(delegate { showContentInfo(r.technicalInfo); });
     }
 
     private void showContentInfo(String info)
     {
-        contentInformation.text = info;
+        contentInformation.text = translator.translate(info);
     }
 
     private void reproduceVideo(String url)

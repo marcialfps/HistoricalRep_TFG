@@ -15,3 +15,7 @@ representationNarration=Representation narration
 english=English
 spanish=Spanish
 allRepresentations=All representations
+information=Information
+legalInformation=Legal information
+appInfo=This app was developed by Marcial Francisco Parrilla Socas, as end-of-degree project in software engineer at University of Oviedo.\n\nThis app is developed in Unity and uses Vuforia in order to use augmented reality technology.
+legalInfo=All the information related to user location and camera is not stored by the app. This information is used in execution time by the app in order to detect near locations and show the representations in augmented reality.\n\nAll the videos and images are property of Marcial Fco. Parrilla Socas.\n\nYou can solve your questions via: uo251851@uniovi.es 
