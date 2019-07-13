@@ -9,6 +9,8 @@ using System.Text;
 using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.Video;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 public class VirtualVisit : MonoBehaviour
 {
@@ -41,8 +43,34 @@ public class VirtualVisit : MonoBehaviour
         configureUI();
     }
 
+    public bool MyRemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+    {
+        bool isOk = true;
+        // If there are errors in the certificate chain, look at each error to determine the cause.
+        if (sslPolicyErrors != SslPolicyErrors.None)
+        {
+            for (int i = 0; i < chain.ChainStatus.Length; i++)
+            {
+                if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
+                {
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+                    bool chainIsValid = chain.Build((X509Certificate2)certificate);
+                    if (!chainIsValid)
+                    {
+                        isOk = false;
+                    }
+                }
+            }
+        }
+        return isOk;
+    }
+
     private void obtainAllRepresentations()
     {
+        ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
         UnityEngine.Debug.Log("Creating request obtain all representations");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representations");
         Stream objStream = wrGET.GetResponse().GetResponseStream();
@@ -60,22 +88,24 @@ public class VirtualVisit : MonoBehaviour
 
     private void obtainRepVideo(Representation r)
     {
+        ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
         UnityEngine.Debug.Log("Creating request obtain video");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/video/" + r.id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
-        r.videoURL = data;
+        r.videoURL = serverUrl + data;
     }
 
     private void obtainRepImage(Representation r)
     {
+        ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
         UnityEngine.Debug.Log("Creating request obtain image");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + r.id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
-        r.imageURL = data;
+        r.imageURL = serverUrl + data;
     }
 
     private void configureUI()
@@ -101,26 +131,23 @@ public class VirtualVisit : MonoBehaviour
     private IEnumerator configureImageButton(Representation r, Button b)
     {
         UnityEngine.Debug.Log(r.imageURL);
-        WWW www = new WWW(serverUrl + r.imageURL);
+        WWW www = new WWW(r.imageURL);
         yield return www;
         b.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
-    private IEnumerator configureImage(Representation r, GameObject i)
+    private IEnumerator configureImage(String imageurl)
     {
-        UnityEngine.Debug.Log("HEELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLO");
-        UnityEngine.Debug.Log(serverUrl+r.imageURL);
-        WWW www = new WWW(serverUrl+r.imageURL);
+        UnityEngine.Debug.Log(imageurl);
+        WWW www = new WWW(imageurl);
         yield return www;
-        i.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
-        i.gameObject.SetActive(true);
+       // i.SetActive(true);
+        maskActualLocation.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
 
     private void reproduceRep(Representation r)
     {
-        // 
-        configureInformationPanel(r);
         panelRepresentation.gameObject.SetActive(true);
         PanelControl pc = buttonCloseRepresentation.gameObject.GetComponent<PanelControl>();
         pc.panelToShow1 = panelVirtualVisit;
@@ -138,16 +165,17 @@ public class VirtualVisit : MonoBehaviour
         panelOptions.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
         titleRep.text = translator.translate(r.title);
-        reproduceVideo(serverUrl+r.videoURL);
+        reproduceVideo(r.videoURL);
+        configureInformationPanel(r);
         TextToSpeech tts = (new GameObject("TextToSpeechObject")).AddComponent<TextToSpeech>();
         tts.launchTTS(translator.translate(r.description), audioSource);
     }
 
     private void configureInformationPanel(Representation r)
     {
-        StartCoroutine(configureImage(r, maskActualLocation));
         titleInfo.text = translator.translate(r.title);
         contentInformation.text = translator.translate(r.description); //Default
+        StartCoroutine(configureImage(r.imageURL));
         descriptionButton.onClick.AddListener(delegate { showContentInfo(r.description); });
         historyButton.onClick.AddListener(delegate { showContentInfo(r.history); });
         interestInfo.onClick.AddListener(delegate { showContentInfo(r.interestInfo); });

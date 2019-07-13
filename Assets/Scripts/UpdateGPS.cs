@@ -80,7 +80,7 @@ public class UpdateGPS : MonoBehaviour
             foreach (Location l in locations)
             {
                 var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
-                if (distance < 20000 && actualRep == null) // less 20 meters show
+                if (distance < 200000000 && actualRep == null) // less 20 meters show
                 {
                     UnityEngine.Debug.Log("Location detected at "+distance+" meters.");
                     obtainAllInfo(l.id);
@@ -88,7 +88,7 @@ public class UpdateGPS : MonoBehaviour
                     obtainRepImage(l.id);
                     isShowing = true;
                 }
-                else if (distance < 30000) // less 200 meters show as near location
+                else if (distance < 2000000) // less 200 meters show as near location
                 {
                     UnityEngine.Debug.Log("Near location detected at "+distance+" meters.");
                     obtainLocationImage(l);
@@ -235,7 +235,7 @@ public class UpdateGPS : MonoBehaviour
 
     private IEnumerator configureImage(String image, GameObject i)
     {
-        UnityEngine.Debug.Log(serverUrl+image);
+        UnityEngine.Debug.Log(image);
         WWW www = new WWW(image);
         yield return www;
         i.gameObject.SetActive(true);
