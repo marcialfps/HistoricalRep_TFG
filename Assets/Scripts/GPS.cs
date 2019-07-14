@@ -25,6 +25,9 @@ public class GPS : MonoBehaviour {
         longitude = Input.location.lastData.longitude;
     }
 
+    /**
+     * It waits until 20 seconds to obtain the location. 
+     */
     private IEnumerator StartLocationService()
     {
         if(!Input.location.isEnabledByUser)

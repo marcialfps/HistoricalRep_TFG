@@ -10,7 +10,9 @@ public class PanelControl : MonoBehaviour {
     public GameObject panelToShow1, panelToShow2, panelActual;
     public Boolean openTwoPanels;
 
-	// Use this for initialization
+	/**
+     * Close the actual panel and show the other.
+     */
 	void Start () {
         button.onClick.AddListener(openPanel);
     }

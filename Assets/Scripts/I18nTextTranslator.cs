@@ -5,7 +5,9 @@ public class I18nTextTranslator : MonoBehaviour
 {
     public string TextId;
 
-    // Use this for initialization
+    /**
+     * It changes the text according to the ISO code.
+     */
     void Start()
     {
         var text = GetComponent<Text>();
@@ -14,11 +16,5 @@ public class I18nTextTranslator : MonoBehaviour
                 text.text = I18n.GetLanguage();
             else
                 text.text = I18n.Fields[TextId];
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }

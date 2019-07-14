@@ -10,7 +10,9 @@ public class ManageLocalData : MonoBehaviour {
     public Dropdown languageDropdown;
     public Canvas canvasActual;
 
-	// Use this for initialization
+	/**
+     * Configure all the options.
+     */
 	void Start () {
         configureToggleAR();
         configureDropdownLanguage();
@@ -70,6 +72,10 @@ public class ManageLocalData : MonoBehaviour {
         PlayerPrefs.Save();
     }
 
+    /**
+     * When language is changed, it reloads the scene and
+     * desactive the canvas of the previous scene.
+     */
     private void saveLanguage()
     {
         if (languageDropdown.value == 0)
@@ -81,13 +87,13 @@ public class ManageLocalData : MonoBehaviour {
         }
         
         PlayerPrefs.Save();
-        //I18n.LoadLanguage();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         UnityEngine.Debug.Log(SceneManager.sceneCount);
         canvasActual.gameObject.SetActive(false);
     }
 
     /* DATA LOAD */
+
     private int loadARMode()
     {
         return PlayerPrefs.GetInt("AR_mode");

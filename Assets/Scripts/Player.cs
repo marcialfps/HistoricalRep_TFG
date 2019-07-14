@@ -10,6 +10,7 @@ public class Player : MonoBehaviour {
     public RawImage playpause;
     public Texture play, pause;
     public VideoPlayer videoplayer;
+    public AudioSource audioSource;
 
 	void Start() {
         playpauseBtn.onClick.AddListener(pauseVideo);
@@ -17,6 +18,7 @@ public class Player : MonoBehaviour {
 	
 	void playVideo() {
         videoplayer.Play();
+        audioSource.Play();
         playpauseBtn.onClick.AddListener(pauseVideo);
         playpause.texture = pause;
     }
@@ -24,6 +26,7 @@ public class Player : MonoBehaviour {
     void pauseVideo()
     {
         videoplayer.Pause();
+        audioSource.Pause();
         playpauseBtn.onClick.AddListener(playVideo);
         playpause.texture = play;
     }

@@ -9,7 +9,10 @@ public class Navigation : MonoBehaviour {
     public GameObject panelMap, panelVirtualVisit, panelSettings;
     public RawImage realVisitImage, virtualVisitImage, settingsImage;
 
-	// Use this for initialization
+	/**
+     * Change the navigation bar and active or desactive the panels depending on the
+     * option. 
+     */
 	void Start () {
         realVisitButton.onClick.AddListener(delegate { activatePanel(realVisitButton, realVisitImage, panelMap, panelVirtualVisit, panelSettings); });
         virtualVisitButton.onClick.AddListener(delegate { activatePanel(virtualVisitButton, virtualVisitImage, panelVirtualVisit, panelMap, panelSettings); });

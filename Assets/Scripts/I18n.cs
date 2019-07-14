@@ -92,6 +92,7 @@ class I18n : MonoBehaviour
     /// <returns>The 2-letter ISO code from system language.</returns>
     public static string Get2LetterISOCodeFromSystemLanguage()
     {
+        // User settings
         if (PlayerPrefs.GetString("Language") == "English" ) {
             return "EN";
         } else if (PlayerPrefs.GetString("Language") == "Spanish")

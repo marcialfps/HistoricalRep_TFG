@@ -5086,8 +5086,8 @@ Camera:
   m_GameObject: {fileID: 1231692310}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
-  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -8076,6 +8076,7 @@ MonoBehaviour:
   play: {fileID: 2800000, guid: a6319d4ab7ac74f4ba0a5a7cf5274afa, type: 3}
   pause: {fileID: 2800000, guid: 00a130e4b00072844983d9898b21579b, type: 3}
   videoplayer: {fileID: 310902739}
+  audioSource: {fileID: 310902738}
 --- !u!1 &1873869065
 GameObject:
   m_ObjectHideFlags: 0

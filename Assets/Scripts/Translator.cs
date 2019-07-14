@@ -10,9 +10,12 @@ using System.Runtime;
 
 public class Translator {
 
+    /**
+     * If the language is english, it calls the API in order to translate the spanish text.
+     */
     public string translate(string inputText)
     {
-        UnityEngine.Debug.Log(inputText);
+        UnityEngine.Debug.Log("Translating text: "+ inputText);
         if (PlayerPrefs.GetString("Language").Equals("English")) {
             WebRequest wrGET = WebRequest.Create("https://translation.googleapis.com/language/translate/v2?q="+inputText+"&target=en&key="
                 +"AIzaSyDIhY8U0bDAtyYyJw-iuIBI2a1KPWbYMJE");

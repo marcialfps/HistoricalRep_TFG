@@ -80,7 +80,7 @@ public class UpdateGPS : MonoBehaviour
             foreach (Location l in locations)
             {
                 var distance = CoordinatesDistanceExtensions.DistanceTo(l, coordactual);
-                if (distance < 200000000 && actualRep == null) // less 20 meters show
+                if (distance < 20 && actualRep == null) // less 20 meters show
                 {
                     UnityEngine.Debug.Log("Location detected at "+distance+" meters.");
                     obtainAllInfo(l.id);
@@ -88,7 +88,7 @@ public class UpdateGPS : MonoBehaviour
                     obtainRepImage(l.id);
                     isShowing = true;
                 }
-                else if (distance < 2000000) // less 200 meters show as near location
+                else if (distance < 200) // less 200 meters show as near location
                 {
                     UnityEngine.Debug.Log("Near location detected at "+distance+" meters.");
                     obtainLocationImage(l);
@@ -116,18 +116,24 @@ public class UpdateGPS : MonoBehaviour
         }
     }
 
+    /**
+     * It shows a panel where the user can play the representation.
+     */
     private void configureUI()
     {
-        UnityEngine.Debug.Log("Configuring UI: "+actualRep.title);
+        UnityEngine.Debug.Log("Configuring UI for actual location: "+actualRep.title+".");
         title.text = translator.translate(actualRep.title);
         panelShow.gameObject.SetActive(true);
         showButton.onClick.AddListener(showScene);
     }
 
+    /**
+     * It obtains all the list of locations.
+     */
     private void obtainLocations()
     {
         ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
-        UnityEngine.Debug.Log("Creating request obtain locations");
+        UnityEngine.Debug.Log("Creating request obtain locations.");
         WebRequest wrGET = WebRequest.Create(serverUrl+ "/location/list");
 
         Stream objStream = wrGET.GetResponse().GetResponseStream();
@@ -138,6 +144,9 @@ public class UpdateGPS : MonoBehaviour
         this.locations = new ArrayList(deserializedList);
     }
 
+    /**
+     * Auxiliar method to solve problems when trying to connect to the server.
+     */
     public bool MyRemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
     {
         bool isOk = true;
@@ -163,14 +172,16 @@ public class UpdateGPS : MonoBehaviour
         return isOk;
     }
 
+    /**
+     * Obtain all the information of a given representation.
+     */
     private void obtainAllInfo(long id)
     {
-        UnityEngine.Debug.Log("Creating request obtain all info of representation "+id+".");
+        UnityEngine.Debug.Log("Creating request obtain all info of representation: "+id+".");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/"+id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
-        UnityEngine.Debug.Log(data);
         List<Representation> deserializedList = JsonConvert.DeserializeObject<List<Representation>>(data);
         this.actualRep = deserializedList[0];
     }
@@ -183,7 +194,6 @@ public class UpdateGPS : MonoBehaviour
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
         actualRep.videoURL = serverUrl + data;
-        UnityEngine.Debug.Log(actualRep.videoURL);
     }
 
     private void obtainRepImage(long id)
@@ -207,6 +217,10 @@ public class UpdateGPS : MonoBehaviour
         l.image = data;
     }
 
+    /**
+     * This method configure the UI for near locations. It sorts the lcoations by distance and show
+     * the images. If no near locations are detected, a text is showed.
+     */
     private void configureNearLocations()
     {
         UnityEngine.Debug.Log("Configuring near locations.");
@@ -242,14 +256,19 @@ public class UpdateGPS : MonoBehaviour
         i.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
+    /** Calls Google Maps and update the image.
+     */
     private IEnumerator obtainMap()
     {
-        UnityEngine.Debug.Log(urlMaps1 + GPS.Instance.latitude + "," + GPS.Instance.longitude + urlMaps2 + GPS.Instance.latitude + "," + GPS.Instance.longitude + urlMaps3);
+        UnityEngine.Debug.Log("Obtaining map.");
         WWW www = new WWW(urlMaps1+GPS.Instance.latitude+","+GPS.Instance.longitude+urlMaps2+GPS.Instance.latitude+","+GPS.Instance.longitude+urlMaps3);
         yield return www;
         map.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
+    /**
+     * It actives all the elements needed and configure the UI. Finally, reproduce the video and launch the TTS.
+     */
     private void showScene()
     {
         panelRepresentation.gameObject.SetActive(true);
@@ -272,6 +291,9 @@ public class UpdateGPS : MonoBehaviour
         tts.launchTTS(actualRep.description, audioSource);
     }
 
+    /**
+     * Set the content that will be shown.
+     */
     private void configureInformationPanel() {
         titleInfo.text = translator.translate(actualRep.title);
         contentInformation.text = translator.translate(actualRep.description); //Default
@@ -300,7 +322,7 @@ public class UpdateGPS : MonoBehaviour
     private void reproduceVideo(String url)
     {
         renderer.enabled = true;
-        if (videoPlayer.url != url) videoPlayer.Stop(); //Casos en lo que se cambie de video
+        if (videoPlayer.url != url) videoPlayer.Stop(); //In case the video is changed.
         if (!videoPlayer.isPlaying)
         {
             videoPlayer.url = url;

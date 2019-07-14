@@ -14,9 +14,14 @@ using System.Security.Cryptography.X509Certificates;
 
 public class VirtualVisit : MonoBehaviour
 {
-
+    /**
+     * URLs of the server.
+     */
     private String serverUrl = "https://serverhistrep.herokuapp.com";
 
+    /**
+     * UI elements.
+     */
     public Text titleRep, titleInfo, contentInformation;
     public Button cancelButton, descriptionButton, historyButton, 
         interestInfo, technicalInfo, buttonCloseRepresentation;
@@ -28,10 +33,15 @@ public class VirtualVisit : MonoBehaviour
     public AudioSource audioSource;
     public Renderer renderer;
 
+    /**
+     * Private fields of the Script.
+     */
     private ArrayList representations;
     private Translator translator = new Translator();
 
-    // Use this for initialization
+    /**
+     * When started, all the information of the representation is obtained. Next, it configures the UI.
+     */
     void Start()
     {
         obtainAllRepresentations();
@@ -43,6 +53,9 @@ public class VirtualVisit : MonoBehaviour
         configureUI();
     }
 
+    /**
+     * Auxiliar method to solve problems when trying to connect to the server.
+     */
     public bool MyRemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
     {
         bool isOk = true;
@@ -71,17 +84,11 @@ public class VirtualVisit : MonoBehaviour
     private void obtainAllRepresentations()
     {
         ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
-        UnityEngine.Debug.Log("Creating request obtain all representations");
+        UnityEngine.Debug.Log("Creating request obtain all representations.");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representations");
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
         String data = objReader.ReadLine();
-        UnityEngine.Debug.Log(data);
-        convertToObject(data);
-    }
-
-    private void convertToObject(String data)
-    {
         List<Representation> deserializedList = JsonConvert.DeserializeObject<List<Representation>>(data);
         this.representations = new ArrayList(deserializedList);
     }
@@ -89,7 +96,7 @@ public class VirtualVisit : MonoBehaviour
     private void obtainRepVideo(Representation r)
     {
         ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
-        UnityEngine.Debug.Log("Creating request obtain video");
+        UnityEngine.Debug.Log("Creating request obtain video.");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/video/" + r.id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
@@ -100,7 +107,7 @@ public class VirtualVisit : MonoBehaviour
     private void obtainRepImage(Representation r)
     {
         ServicePointManager.ServerCertificateValidationCallback = MyRemoteCertificateValidationCallback;
-        UnityEngine.Debug.Log("Creating request obtain image");
+        UnityEngine.Debug.Log("Creating request obtain image.");
         WebRequest wrGET = WebRequest.Create(serverUrl + "/representation/image/" + r.id);
         Stream objStream = wrGET.GetResponse().GetResponseStream();
         StreamReader objReader = new StreamReader(objStream);
@@ -108,6 +115,9 @@ public class VirtualVisit : MonoBehaviour
         r.imageURL = serverUrl + data;
     }
 
+    /**
+     * It creates one button per representation, setting the image and representation video.
+     */
     private void configureUI()
     {
         int i = 0;
@@ -141,11 +151,12 @@ public class VirtualVisit : MonoBehaviour
         UnityEngine.Debug.Log(imageurl);
         WWW www = new WWW(imageurl);
         yield return www;
-       // i.SetActive(true);
         maskActualLocation.GetComponentInChildren<Image>().sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
     }
 
-
+    /**
+     * It actives all the elements needed and configure the UI. Finally, reproduce the video and launch the TTS.
+     */
     private void reproduceRep(Representation r)
     {
         panelRepresentation.gameObject.SetActive(true);
@@ -171,6 +182,9 @@ public class VirtualVisit : MonoBehaviour
         tts.launchTTS(translator.translate(r.description), audioSource);
     }
 
+    /**
+     * Set the content that will be shown.
+     */
     private void configureInformationPanel(Representation r)
     {
         titleInfo.text = translator.translate(r.title);
@@ -190,7 +204,7 @@ public class VirtualVisit : MonoBehaviour
     private void reproduceVideo(String url)
     {
         renderer.enabled = true;
-        if (videoPlayer.url != url) videoPlayer.Stop(); //Casos en lo que se cambie de video
+        if (videoPlayer.url != url) videoPlayer.Stop(); //In case the video is changed.
         if (!videoPlayer.isPlaying)
         {
             videoPlayer.url = url;

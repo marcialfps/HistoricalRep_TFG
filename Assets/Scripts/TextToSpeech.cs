@@ -7,8 +7,9 @@ public class TextToSpeech : MonoBehaviour {
     public AudioSource audioSource;
     private string text;
 
-    //Poner como un solo metodo
-
+    /**
+     * If the narration is activated, it calls the API.
+     */
     public void launchTTS(string text, AudioSource audioSource)
     {
         if (PlayerPrefs.GetInt("Narration") == 1)
@@ -20,6 +21,10 @@ public class TextToSpeech : MonoBehaviour {
         }
     }
 	
+    /**
+     * It calls the API with two different urls depending on the app language.
+     * It obtains the audio from the response and plays it.
+     */
 	private IEnumerator obtainAudio()
     {
         string url;
