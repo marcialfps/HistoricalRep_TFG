@@ -39,7 +39,7 @@ public class UpdateGPS : MonoBehaviour
      */
     public Text title, titleRep, titleInfo, contentInformation, textNoNearLocations;
     public Button showButton, cancelButton, descriptionButton, historyButton, interestInfo, technicalInfo;
-    public GameObject panelOptions, panelShow, panelRepresentation, panelMap, arCamera, camera, representationScreen,
+    public GameObject panelOptions, panelShow, panelRepresentation, panelMap, arCamera, camera,
         maskNearLocation1, marskNearLocation2, maskActualLocation;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
@@ -105,8 +105,6 @@ public class UpdateGPS : MonoBehaviour
             if (actualRep == null)
             {
                 panelShow.SetActive(false);
-                videoPlayer.Stop();
-                renderer.enabled = false;
             } else
             {
                 configureUI();
@@ -279,7 +277,6 @@ public class UpdateGPS : MonoBehaviour
         {
             camera.SetActive(true);
         }
-        representationScreen.SetActive(true);
         panelShow.gameObject.SetActive(false);
         panelMap.gameObject.SetActive(false);
         panelOptions.gameObject.SetActive(false);
@@ -313,7 +310,6 @@ public class UpdateGPS : MonoBehaviour
     {
         panelRepresentation.gameObject.SetActive(false);
         arCamera.SetActive(false);
-        representationScreen.SetActive(false);
         panelMap.gameObject.SetActive(true);
         isShowing = false;
         actualRep = null;

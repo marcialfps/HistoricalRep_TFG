@@ -28,7 +28,7 @@ public class VirtualVisit : MonoBehaviour
     public Button sampleButton;
     public GameObject buttonContent;
     public GameObject panelVirtualVisit, panelRepresentation, panelOptions,
-        arCamera, camera, representationScreen, maskActualLocation;
+        arCamera, camera, maskActualLocation;
     public VideoPlayer videoPlayer;
     public AudioSource audioSource;
     public Renderer renderer;
@@ -170,8 +170,6 @@ public class VirtualVisit : MonoBehaviour
         {
             camera.SetActive(true);
         }
-
-        representationScreen.SetActive(true);
         panelVirtualVisit.gameObject.SetActive(false);
         panelOptions.gameObject.SetActive(false);
         cancelButton.onClick.AddListener(configureCancelButton);
@@ -204,7 +202,7 @@ public class VirtualVisit : MonoBehaviour
     private void reproduceVideo(String url)
     {
         renderer.enabled = true;
-        if (videoPlayer.url != url) videoPlayer.Stop(); //In case the video is changed.
+        videoPlayer.Stop(); //In case the video is changed.
         if (!videoPlayer.isPlaying)
         {
             videoPlayer.url = url;
@@ -217,7 +215,8 @@ public class VirtualVisit : MonoBehaviour
     {
         panelRepresentation.gameObject.SetActive(false);
         arCamera.SetActive(false);
-        representationScreen.SetActive(false);
         panelVirtualVisit.gameObject.SetActive(true);
+        videoPlayer.Stop();
+        audioSource.Stop();
     }
 }
